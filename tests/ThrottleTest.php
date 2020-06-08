@@ -62,17 +62,23 @@ abstract class ThrottleTest extends TestCase
     public function ensure_resets_after_ttl(): void
     {
         $factory = self::factory();
-        $quota = $factory->throttle('foo', 1, 2)->hit();
+        $quota = $factory->throttle('foo', 2, 2)->hit();
 
         $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+
+        $quota = $factory->throttle('foo', 2, 2)->hit();
+
+        $this->assertSame(2, $quota->hits());
         $this->assertSame(0, $quota->remaining());
         $this->assertSame(2, $quota->resetsIn());
 
         sleep($quota->resetsIn());
 
-        $quota = $factory->throttle('foo', 1, 2)->hit();
+        $quota = $factory->throttle('foo', 2, 2)->hit();
         $this->assertSame(1, $quota->hits());
-        $this->assertSame(0, $quota->remaining());
+        $this->assertSame(1, $quota->remaining());
         $this->assertSame(2, $quota->resetsIn());
     }
 

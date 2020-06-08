@@ -26,10 +26,11 @@ final class Psr6CacheStore implements Store
 
         if (!$counter instanceof Counter) {
             $counter = $key->createCounter();
-            $item->expiresAt($counter->resetsAt());
         }
 
-        $this->cache->save($item->set($counter = $counter->addHit()));
+        $item->set($counter = $counter->addHit());
+        $item->expiresAfter($counter->resetsIn());
+        $this->cache->save($item);
 
         return $counter;
     }
