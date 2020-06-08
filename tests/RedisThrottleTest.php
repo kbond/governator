@@ -22,8 +22,6 @@ final class RedisThrottleTest extends ThrottleTest
         $client = new \Redis();
         $client->connect('127.0.0.1');
 
-        $client->flushAll();
-
         return new RedisStore($client);
     }
 }

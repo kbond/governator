@@ -40,15 +40,20 @@ abstract class ThrottleTest extends TestCase
      */
     public function can_hit_throttle(): void
     {
+        $resource = 'foo';
+        $limit = 5;
+        $ttl = 60;
         $factory = self::factory();
-        $quota = $factory->throttle('foo', 5, 60)->hit();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $quota = $factory->throttle($resource, $limit, $ttl)->hit();
 
         $this->assertSame(5, $quota->limit());
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
 
-        $quota = $factory->throttle('foo')->allow(5)->every(60)->hit();
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit();
 
         $this->assertSame(5, $quota->limit());
         $this->assertSame(2, $quota->hits());
@@ -61,14 +66,19 @@ abstract class ThrottleTest extends TestCase
      */
     public function ensure_resets_after_ttl(): void
     {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 2;
         $factory = self::factory();
-        $quota = $factory->throttle('foo', 2, 2)->hit();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $quota = $factory->throttle($resource, $limit, $ttl)->hit();
 
         $this->assertSame(1, $quota->hits());
         $this->assertSame(1, $quota->remaining());
         $this->assertSame(2, $quota->resetsIn());
 
-        $quota = $factory->throttle('foo', 2, 2)->hit();
+        $quota = $factory->throttle($resource, $limit, $ttl)->hit();
 
         $this->assertSame(2, $quota->hits());
         $this->assertSame(0, $quota->remaining());
@@ -76,7 +86,7 @@ abstract class ThrottleTest extends TestCase
 
         sleep($quota->resetsIn());
 
-        $quota = $factory->throttle('foo', 2, 2)->hit();
+        $quota = $factory->throttle($resource, $limit, $ttl)->hit();
         $this->assertSame(1, $quota->hits());
         $this->assertSame(1, $quota->remaining());
         $this->assertSame(2, $quota->resetsIn());
@@ -87,15 +97,20 @@ abstract class ThrottleTest extends TestCase
      */
     public function exceeding_limit_throws_rate_limit_exceeded_exception(): void
     {
+        $resource = 'foo';
+        $limit = 5;
+        $ttl = 2;
         $factory = self::factory();
-        $factory->throttle('foo', 5, 2)->hit();
-        $factory->throttle('foo', 5, 2)->hit();
-        $factory->throttle('foo', 5, 2)->hit();
-        $factory->throttle('foo', 5, 2)->hit();
-        $factory->throttle('foo', 5, 2)->hit();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
 
         try {
-            $factory->throttle('foo', 5, 2)->hit();
+            $factory->throttle($resource, $limit, $ttl)->hit();
         } catch (QuotaExceeded $exception) {
             $this->assertSame(5, $exception->limit());
             $this->assertSame(6, $exception->hits());
@@ -104,7 +119,7 @@ abstract class ThrottleTest extends TestCase
 
             sleep($exception->resetsIn());
 
-            $quota = $factory->throttle('foo', 5, 2)->hit();
+            $quota = $factory->throttle($resource, $limit, $ttl)->hit();
 
             $this->assertSame(5, $quota->limit());
             $this->assertSame(1, $quota->hits());
@@ -135,6 +150,7 @@ abstract class ThrottleTest extends TestCase
     public function can_reset_throttle(): void
     {
         $throttle = self::factory()->throttle('foo', 5, 60);
+        $throttle->reset();
 
         $this->assertSame(4, $throttle->hit()->remaining());
         $this->assertSame(3, $throttle->hit()->remaining());

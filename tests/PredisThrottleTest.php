@@ -20,9 +20,6 @@ final class PredisThrottleTest extends ThrottleTest
 
     protected static function createStore(): Store
     {
-        $client = new Client();
-        $client->flushall();
-
-        return new RedisStore($client);
+        return new RedisStore(new Client());
     }
 }
