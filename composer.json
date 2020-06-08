@@ -1,0 +1,45 @@
+{
+    "name": "zenstruck/governator",
+    "description": "TODO",
+    "homepage": "https://github.com/zenstruck/governator",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["throttle"],
+    "authors": [
+        {
+            "name": "Kevin Bond",
+            "email": "kevinbond@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5",
+        "predis/predis": "^1.0",
+        "psr/cache": "^1.0",
+        "psr/simple-cache": "^1.0",
+        "symfony/cache": ">=3.4.0"
+    },
+    "suggest": {
+        "psr/cache": "To use the PSR-6 store",
+        "psr/simple-cache": "To use the PSR-16 store",
+        "ext-redis": "To use the Redis store",
+        "predis/predis": "To use the Redis store without ext-redis"
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": { "Zenstruck\\Governator\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "Zenstruck\\Governator\\Tests\\": "tests/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
+    }
+}

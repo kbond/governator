@@ -1,0 +1,7 @@
+/composer.lock
+/phpunit.xml
+/phpunit-dama-doctrine.xml
+/vendor/
+/build/
+/.php_cs.cache
+/.phpunit.result.cache
