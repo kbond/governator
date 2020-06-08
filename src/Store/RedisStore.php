@@ -2,6 +2,7 @@
 
 namespace Zenstruck\Governator\Store;
 
+use Predis\ClientInterface;
 use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Key;
 use Zenstruck\Governator\Store;
@@ -11,25 +12,23 @@ use Zenstruck\Governator\Store;
  */
 final class RedisStore implements Store
 {
-    private \Redis $client;
+    private $client;
 
-    public function __construct(\Redis $client)
+    /**
+     * @param \Redis|ClientInterface $client
+     */
+    public function __construct($client)
     {
+        if (!$client instanceof \Redis && !$client instanceof ClientInterface) {
+            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be Redis or Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
+        }
+
         $this->client = $client;
     }
 
     public function hit(Key $key): Counter
     {
-        $results = $this->client->eval(
-            self::luaScript(), [
-                (string) $key,
-                microtime(true),
-                time(),
-                $key->ttl(),
-                $key->limit(),
-            ],
-            1
-        );
+        $results = $this->getResults($key);
 
         return new Counter($key->limit() - $results[2], $results[1]);
     }
@@ -37,6 +36,24 @@ final class RedisStore implements Store
     public function reset(Key $key): void
     {
         $this->client->del((string) $key);
+    }
+
+    private function getResults(Key $key): array
+    {
+        if ($this->client instanceof \Redis) {
+            return $this->client->eval(
+                self::luaScript(), [
+                    (string) $key,
+                    microtime(true),
+                    time(),
+                    $key->ttl(),
+                    $key->limit(),
+                ],
+                1
+            );
+        }
+
+        return $this->client->eval(self::luaScript(), 1, (string) $key, microtime(true), time(), $key->ttl(), $key->limit());
     }
 
     /**
