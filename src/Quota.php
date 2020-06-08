@@ -5,7 +5,7 @@ namespace Zenstruck\Governator;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class RateLimit
+final class Quota
 {
     private int $limit;
     private int $hits;
@@ -59,9 +59,6 @@ final class RateLimit
         return $clone;
     }
 
-    /**
-     * @internal
-     */
     public function hasBeenExceeded(): bool
     {
         return $this->hits > $this->limit;

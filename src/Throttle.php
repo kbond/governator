@@ -2,6 +2,8 @@
 
 namespace Zenstruck\Governator;
 
+use Zenstruck\Governator\Exception\QuotaExceeded;
+
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
@@ -36,15 +38,15 @@ final class Throttle
         return $clone;
     }
 
-    public function hit(): RateLimit
+    public function hit(): Quota
     {
-        $rateLimit = $this->store->hit($this->key());
+        $quota = $this->store->hit($this->key());
 
-        if ($rateLimit->hasBeenExceeded()) {
-            throw new RateLimitExceeded($rateLimit);
+        if ($quota->hasBeenExceeded()) {
+            throw new QuotaExceeded($quota);
         }
 
-        return $rateLimit;
+        return $quota;
     }
 
     public function reset(): void

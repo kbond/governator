@@ -4,7 +4,7 @@ namespace Zenstruck\Governator\Store;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Zenstruck\Governator\Key;
-use Zenstruck\Governator\RateLimit;
+use Zenstruck\Governator\Quota;
 use Zenstruck\Governator\Store;
 
 /**
@@ -19,19 +19,19 @@ final class Psr6CacheStore implements Store
         $this->cache = $cache;
     }
 
-    public function hit(Key $key): RateLimit
+    public function hit(Key $key): Quota
     {
         $item = $this->cache->getItem((string) $key);
-        $rateLimit = $item->get();
+        $quota = $item->get();
 
-        if (!$rateLimit instanceof RateLimit) {
-            $rateLimit = RateLimit::forKey($key);
-            $item->expiresAt($rateLimit->resetsAt());
+        if (!$quota instanceof Quota) {
+            $quota = Quota::forKey($key);
+            $item->expiresAt($quota->resetsAt());
         }
 
-        $this->cache->save($item->set($rateLimit = $rateLimit->addHit()));
+        $this->cache->save($item->set($quota = $quota->addHit()));
 
-        return $rateLimit;
+        return $quota;
     }
 
     public function reset(Key $key): void

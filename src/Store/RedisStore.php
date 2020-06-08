@@ -3,7 +3,7 @@
 namespace Zenstruck\Governator\Store;
 
 use Zenstruck\Governator\Key;
-use Zenstruck\Governator\RateLimit;
+use Zenstruck\Governator\Quota;
 use Zenstruck\Governator\Store;
 
 /**
@@ -18,7 +18,7 @@ final class RedisStore implements Store
         $this->client = $client;
     }
 
-    public function hit(Key $key): RateLimit
+    public function hit(Key $key): Quota
     {
         $results = $this->client->eval(
             self::luaScript(), [
@@ -31,7 +31,7 @@ final class RedisStore implements Store
             1
         );
 
-        return new RateLimit(
+        return new Quota(
             $key->limit(),
             $key->limit() - $results[2],
             \DateTimeImmutable::createFromFormat('U', $results[1])

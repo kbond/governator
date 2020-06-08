@@ -2,7 +2,7 @@
 
 namespace Zenstruck\Governator\Tests;
 
-use Zenstruck\Governator\RateLimitExceeded;
+use Zenstruck\Governator\Exception\QuotaExceeded;
 use Zenstruck\Governator\Store;
 use Zenstruck\Governator\ThrottleFactory;
 
@@ -17,21 +17,21 @@ trait ThrottleTests
     public function can_hit_throttle(): void
     {
         $factory = self::factory();
-        $rateLimit = $factory->throttle('foo', 5, 60)->hit();
+        $quota = $factory->throttle('foo', 5, 60)->hit();
 
-        $this->assertSame(5, $rateLimit->limit());
-        $this->assertSame(1, $rateLimit->hits());
-        $this->assertSame(4, $rateLimit->remaining());
-        $this->assertLessThanOrEqual(60, $rateLimit->resetsIn());
-        $this->assertGreaterThanOrEqual(59, $rateLimit->resetsIn());
+        $this->assertSame(5, $quota->limit());
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(4, $quota->remaining());
+        $this->assertLessThanOrEqual(60, $quota->resetsIn());
+        $this->assertGreaterThanOrEqual(59, $quota->resetsIn());
 
-        $rateLimit = $factory->throttle('foo')->allow(5)->every(60)->hit();
+        $quota = $factory->throttle('foo')->allow(5)->every(60)->hit();
 
-        $this->assertSame(5, $rateLimit->limit());
-        $this->assertSame(2, $rateLimit->hits());
-        $this->assertSame(3, $rateLimit->remaining());
-        $this->assertLessThanOrEqual(60, $rateLimit->resetsIn());
-        $this->assertGreaterThanOrEqual(59, $rateLimit->resetsIn());
+        $this->assertSame(5, $quota->limit());
+        $this->assertSame(2, $quota->hits());
+        $this->assertSame(3, $quota->remaining());
+        $this->assertLessThanOrEqual(60, $quota->resetsIn());
+        $this->assertGreaterThanOrEqual(59, $quota->resetsIn());
     }
 
     /**
@@ -40,16 +40,16 @@ trait ThrottleTests
     public function ensure_resets_after_ttl(): void
     {
         $factory = self::factory();
-        $rateLimit = $factory->throttle('foo', 1, 3)->hit();
+        $quota = $factory->throttle('foo', 1, 3)->hit();
 
-        $this->assertSame(1, $rateLimit->hits());
-        $this->assertSame(0, $rateLimit->remaining());
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(0, $quota->remaining());
 
-        \sleep($rateLimit->resetsIn());
+        \sleep($quota->resetsIn());
 
-        $rateLimit = $factory->throttle('foo', 1, 3)->hit();
-        $this->assertSame(1, $rateLimit->hits());
-        $this->assertSame(0, $rateLimit->remaining());
+        $quota = $factory->throttle('foo', 1, 3)->hit();
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(0, $quota->remaining());
     }
 
     /**
@@ -66,7 +66,7 @@ trait ThrottleTests
 
         try {
             $factory->throttle('foo', 5, 60)->hit();
-        } catch (RateLimitExceeded $exception) {
+        } catch (QuotaExceeded $exception) {
             $this->assertSame(5, $exception->limit());
             $this->assertSame(6, $exception->hits());
             $this->assertSame(0, $exception->remaining());
