@@ -3,6 +3,7 @@
 namespace Zenstruck\Governator\Store;
 
 use Predis\ClientInterface;
+use Symfony\Component\Cache\Traits\RedisProxy;
 use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Key;
 use Zenstruck\Governator\Store;
@@ -15,12 +16,12 @@ final class RedisStore implements Store
     private $client;
 
     /**
-     * @param \Redis|ClientInterface $client
+     * @param \Redis|ClientInterface|RedisProxy $client
      */
     public function __construct($client)
     {
-        if (!$client instanceof \Redis && !$client instanceof ClientInterface) {
-            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be Redis or Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
+        if (!$client instanceof \Redis && !$client instanceof ClientInterface && !$client instanceof RedisProxy) {
+            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be Redis, Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
         }
 
         $this->client = $client;
@@ -40,7 +41,10 @@ final class RedisStore implements Store
 
     private function getResults(Key $key): array
     {
-        if ($this->client instanceof \Redis) {
+        if (
+            $this->client instanceof \Redis ||
+            $this->client instanceof RedisProxy
+        ) {
             return $this->client->eval(
                 self::luaScript(), [
                     (string) $key,
