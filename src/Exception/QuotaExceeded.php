@@ -43,9 +43,6 @@ final class QuotaExceeded extends \RuntimeException
         return $this->quota->resetsAt();
     }
 
-    /**
-     * @return int The seconds until reset
-     */
     public function resetsIn(): int
     {
         return $this->quota->resetsIn();

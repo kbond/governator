@@ -23,6 +23,11 @@ final class Key
         return 'throttle_'.$this->resource.$this->limit.$this->ttl;
     }
 
+    public function createCounter(): Counter
+    {
+        return new Counter(0, \time() + $this->ttl);
+    }
+
     public function resource(): string
     {
         return $this->resource;

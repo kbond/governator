@@ -38,9 +38,12 @@ final class Throttle
         return $clone;
     }
 
+    /**
+     * @throws QuotaExceeded
+     */
     public function hit(): Quota
     {
-        $quota = $this->store->hit($this->key());
+        $quota = new Quota($this->limit, $this->store->hit($this->key()));
 
         if ($quota->hasBeenExceeded()) {
             throw new QuotaExceeded($quota);

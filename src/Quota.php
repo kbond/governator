@@ -8,19 +8,12 @@ namespace Zenstruck\Governator;
 final class Quota
 {
     private int $limit;
-    private int $hits;
-    private \DateTimeImmutable $resetsAt;
+    private Counter $counter;
 
-    public function __construct(int $limit, int $hits, \DateTimeImmutable $resetsAt)
+    public function __construct(int $limit, Counter $counter)
     {
         $this->limit = $limit;
-        $this->hits = $hits;
-        $this->resetsAt = $resetsAt;
-    }
-
-    public static function forKey(Key $key): self
-    {
-        return new self($key->limit(), 0, \DateTimeImmutable::createFromFormat('U', \time() + $key->ttl()));
+        $this->counter = $counter;
     }
 
     public function limit(): int
@@ -30,37 +23,26 @@ final class Quota
 
     public function hits(): int
     {
-        return $this->hits;
+        return $this->counter->hits();
     }
 
     public function remaining(): int
     {
-        return \max(0, $this->limit - $this->hits);
+        return \max(0, $this->limit - $this->hits());
     }
 
     public function resetsAt(): \DateTimeImmutable
     {
-        return $this->resetsAt;
+        return $this->counter->resetsAt();
     }
 
-    /**
-     * @return int The seconds until reset
-     */
     public function resetsIn(): int
     {
-        return \max(0, $this->resetsAt->getTimestamp() - \time());
-    }
-
-    public function addHit(): self
-    {
-        $clone = clone $this;
-        ++$clone->hits;
-
-        return $clone;
+        return $this->counter->resetsIn();
     }
 
     public function hasBeenExceeded(): bool
     {
-        return $this->hits > $this->limit;
+        return $this->counter->hits() > $this->limit;
     }
 }

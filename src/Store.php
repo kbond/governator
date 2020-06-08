@@ -7,7 +7,7 @@ namespace Zenstruck\Governator;
  */
 interface Store
 {
-    public function hit(Key $key): Quota;
+    public function hit(Key $key): Counter;
 
     public function reset(Key $key): void;
 }

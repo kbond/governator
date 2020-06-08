@@ -3,8 +3,8 @@
 namespace Zenstruck\Governator\Store;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Key;
-use Zenstruck\Governator\Quota;
 use Zenstruck\Governator\Store;
 
 /**
@@ -19,19 +19,19 @@ final class Psr6CacheStore implements Store
         $this->cache = $cache;
     }
 
-    public function hit(Key $key): Quota
+    public function hit(Key $key): Counter
     {
         $item = $this->cache->getItem((string) $key);
-        $quota = $item->get();
+        $counter = $item->get();
 
-        if (!$quota instanceof Quota) {
-            $quota = Quota::forKey($key);
-            $item->expiresAt($quota->resetsAt());
+        if (!$counter instanceof Counter) {
+            $counter = $key->createCounter();
+            $item->expiresAt($counter->resetsAt());
         }
 
-        $this->cache->save($item->set($quota = $quota->addHit()));
+        $this->cache->save($item->set($counter = $counter->addHit()));
 
-        return $quota;
+        return $counter;
     }
 
     public function reset(Key $key): void

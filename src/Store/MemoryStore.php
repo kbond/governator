@@ -2,8 +2,8 @@
 
 namespace Zenstruck\Governator\Store;
 
+use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Key;
-use Zenstruck\Governator\Quota;
 use Zenstruck\Governator\Store;
 
 /**
@@ -11,20 +11,20 @@ use Zenstruck\Governator\Store;
  */
 final class MemoryStore implements Store
 {
-    /** @var array<string, Quota> */
+    /** @var array<string, Counter> */
     private array $cache = [];
 
-    public function hit(Key $key): Quota
+    public function hit(Key $key): Counter
     {
-        $quota = $this->cache[(string) $key] ?? Quota::forKey($key);
+        $counter = $this->cache[(string) $key] ?? $key->createCounter();
 
-        if (0 === $quota->resetsIn()) {
-            $quota = Quota::forKey($key);
+        if (0 === $counter->resetsIn()) {
+            $counter = $key->createCounter();
         }
 
-        $this->cache[(string) $key] = $quota = $quota->addHit();
+        $this->cache[(string) $key] = $counter = $counter->addHit();
 
-        return $quota;
+        return $counter;
     }
 
     public function reset(Key $key): void
