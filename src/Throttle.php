@@ -52,6 +52,24 @@ final class Throttle
         return $quota;
     }
 
+    /**
+     * @throws QuotaExceeded
+     */
+    public function block(int $for): Quota
+    {
+        try {
+            return $this->hit();
+        } catch (QuotaExceeded $exception) {
+            if ($exception->resetsIn() > $for) {
+                throw $exception;
+            }
+        }
+
+        sleep($exception->resetsIn());
+
+        return $this->hit();
+    }
+
     public function reset(): void
     {
         $this->store->reset($this->key());

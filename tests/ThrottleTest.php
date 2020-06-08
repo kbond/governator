@@ -135,6 +135,102 @@ abstract class ThrottleTest extends TestCase
     /**
      * @test
      */
+    public function block_returns_quota_right_away_if_not_exceeded(): void
+    {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 2;
+        $factory = self::factory();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $start = time();
+
+        $quota = $factory->throttle($resource, $limit, $ttl)->block(10);
+
+        $this->assertSame($start, time());
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+    }
+
+    /**
+     * @test
+     */
+    public function can_block_throttle_if_available_within_passed_time(): void
+    {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 2;
+        $factory = self::factory();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $start = time();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+
+        $quota = $factory->throttle($resource, $limit, $ttl)->block(10);
+
+        $this->assertSame($start + 2, time());
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+    }
+
+    /**
+     * @test
+     */
+    public function can_block_throttle_if_available_at_exactly_passed_time(): void
+    {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 2;
+        $factory = self::factory();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $start = time();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+
+        $quota = $factory->throttle($resource, $limit, $ttl)->block(2);
+
+        $this->assertSame($start + 2, time());
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+    }
+
+    /**
+     * @test
+     */
+    public function block_throws_quota_exceeded_exception_right_away_if_not_going_to_be_available_within_passed_time(): void
+    {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 10;
+        $factory = self::factory();
+        $factory->throttle($resource, $limit, $ttl)->reset();
+
+        $start = time();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+        $factory->throttle($resource, $limit, $ttl)->hit();
+
+        try {
+            $factory->throttle($resource, $limit, $ttl)->block(2);
+        } catch (QuotaExceeded $exception) {
+            $this->assertSame($start, time());
+            $this->assertSame(3, $exception->hits());
+            $this->assertSame(0, $exception->remaining());
+            $this->assertSame(10, $exception->resetsIn());
+
+            return;
+        }
+
+        $this->fail('Exception not thrown.');
+    }
+
+    /**
+     * @test
+     */
     public function allow_and_every_are_immutable(): void
     {
         $this->assertCount(3, \array_unique([
