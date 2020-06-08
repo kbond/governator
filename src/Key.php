@@ -25,7 +25,7 @@ final class Key
 
     public function createCounter(): Counter
     {
-        return new Counter(0, \time() + $this->ttl);
+        return new Counter(0, time() + $this->ttl);
     }
 
     public function resource(): string

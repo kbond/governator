@@ -23,8 +23,8 @@ final class RedisStore implements Store
         $results = $this->client->eval(
             self::luaScript(), [
                 (string) $key,
-                \microtime(true),
-                \time(),
+                microtime(true),
+                time(),
                 $key->ttl(),
                 $key->limit(),
             ],

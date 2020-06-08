@@ -28,7 +28,7 @@ final class Counter
 
     public function resetsIn(): int
     {
-        return \max(0, $this->resetsAt - \time());
+        return \max(0, $this->resetsAt - time());
     }
 
     public function addHit(): self
