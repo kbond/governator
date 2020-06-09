@@ -53,11 +53,18 @@ abstract class ThrottleTest extends TestCase
         $this->assertSame(4, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
 
-        $quota = $factory->create($resource)->allow($limit)->every($ttl)->hit();
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->create()->hit();
 
         $this->assertSame(5, $quota->limit());
         $this->assertSame(2, $quota->hits());
         $this->assertSame(3, $quota->remaining());
+        $this->assertSame(60, $quota->resetsIn());
+
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit();
+
+        $this->assertSame(5, $quota->limit());
+        $this->assertSame(3, $quota->hits());
+        $this->assertSame(2, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
     }
 
@@ -168,7 +175,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
         $factory->create($resource, $limit, $ttl)->hit();
 
-        $quota = $factory->create($resource, $limit, $ttl)->block(10);
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->create()->block(10);
 
         $this->assertSame($start + 2, time());
         $this->assertSame(1, $quota->hits());
@@ -191,7 +198,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
         $factory->create($resource, $limit, $ttl)->hit();
 
-        $quota = $factory->create($resource, $limit, $ttl)->block(2);
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->block(2);
 
         $this->assertSame($start + 2, time());
         $this->assertSame(1, $quota->hits());
@@ -226,18 +233,6 @@ abstract class ThrottleTest extends TestCase
         }
 
         $this->fail('Exception not thrown.');
-    }
-
-    /**
-     * @test
-     */
-    public function allow_and_every_are_immutable(): void
-    {
-        $this->assertCount(3, \array_unique([
-            \spl_object_id($throttle1 = self::factory()->create('foo')),
-            \spl_object_id($throttle2 = $throttle1->every(2)),
-            \spl_object_id($throttle3 = $throttle1->allow(5)),
-        ]));
     }
 
     /**

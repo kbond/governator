@@ -14,28 +14,12 @@ final class Throttle
     private int $ttl;
     private int $limit;
 
-    public function __construct(Store $store, string $resource, int $limit = 60, int $ttl = 60)
+    public function __construct(Store $store, string $resource, int $limit, int $ttl)
     {
         $this->store = $store;
         $this->resource = $resource;
         $this->ttl = $ttl;
         $this->limit = $limit;
-    }
-
-    public function allow(int $limit): self
-    {
-        $clone = clone $this;
-        $clone->limit = $limit;
-
-        return $clone;
-    }
-
-    public function every(int $seconds): self
-    {
-        $clone = clone $this;
-        $clone->ttl = $seconds;
-
-        return $clone;
     }
 
     /**
