@@ -16,12 +16,12 @@ final class RedisStore implements Store
     private $client;
 
     /**
-     * @param \Redis|\RedisArray|ClientInterface|RedisProxy $client
+     * @param \Redis|\RedisArray|\RedisCluser|ClientInterface $client
      */
     public function __construct($client)
     {
-        if (!$client instanceof \Redis && !$client instanceof \RedisArray && !$client instanceof ClientInterface && !$client instanceof RedisProxy) {
-            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be \Redis, \RedisArray, Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
+        if (!$client instanceof \Redis && !$client instanceof \RedisArray && !$client instanceof \RedisCluster && !$client instanceof ClientInterface && !$client instanceof RedisProxy) {
+            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be \Redis, \RedisArray, \RedisCluster or Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
         }
 
         $this->client = $client;
@@ -45,6 +45,7 @@ final class RedisStore implements Store
 
         if (
             $this->client instanceof \Redis ||
+            $this->client instanceof \RedisCluster ||
             $this->client instanceof RedisProxy
         ) {
             return $this->client->eval(
