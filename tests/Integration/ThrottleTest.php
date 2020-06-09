@@ -1,13 +1,11 @@
 <?php
 
-namespace Zenstruck\Governator\Tests;
+namespace Zenstruck\Governator\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Bridge\PhpUnit\ClockMock;
-use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Exception\QuotaExceeded;
-use Zenstruck\Governator\Key;
 use Zenstruck\Governator\Store;
+use Zenstruck\Governator\Tests\MocksClock;
 use Zenstruck\Governator\ThrottleFactory;
 
 /**
@@ -15,25 +13,7 @@ use Zenstruck\Governator\ThrottleFactory;
  */
 abstract class ThrottleTest extends TestCase
 {
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-
-        ClockMock::register(static::class);
-
-        foreach (static::clockMockClasses() as $class) {
-            ClockMock::register($class);
-        }
-
-        ClockMock::withClockMock(true);
-    }
-
-    public static function tearDownAfterClass()
-    {
-        parent::tearDownAfterClass();
-
-        ClockMock::withClockMock(false);
-    }
+    use MocksClock;
 
     /**
      * @test
@@ -43,7 +23,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 5;
         $ttl = 60;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $quota = $factory->create($resource, $limit, $ttl)->hit();
@@ -76,7 +56,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 2;
         $ttl = 2;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $quota = $factory->create($resource, $limit, $ttl)->hit();
@@ -107,7 +87,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 5;
         $ttl = 2;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $factory->create($resource, $limit, $ttl)->hit();
@@ -147,7 +127,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 2;
         $ttl = 2;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $start = time();
@@ -168,7 +148,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 2;
         $ttl = 2;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $start = time();
@@ -191,7 +171,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 2;
         $ttl = 2;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $start = time();
@@ -214,7 +194,7 @@ abstract class ThrottleTest extends TestCase
         $resource = 'foo';
         $limit = 2;
         $ttl = 10;
-        $factory = self::factory();
+        $factory = $this->factory();
         $factory->create($resource, $limit, $ttl)->reset();
 
         $start = time();
@@ -240,7 +220,7 @@ abstract class ThrottleTest extends TestCase
      */
     public function can_reset_throttle(): void
     {
-        $throttle = self::factory()->create('foo', 5, 60);
+        $throttle = $this->factory()->create('foo', 5, 60);
         $throttle->reset();
 
         $this->assertSame(4, $throttle->hit()->remaining());
@@ -251,16 +231,10 @@ abstract class ThrottleTest extends TestCase
         $this->assertSame(4, $throttle->hit()->remaining());
     }
 
-    abstract protected static function createStore(): Store;
+    abstract protected function createStore(): Store;
 
-    protected static function clockMockClasses(): iterable
+    private function factory(): ThrottleFactory
     {
-        yield Key::class;
-        yield Counter::class;
-    }
-
-    private static function factory(): ThrottleFactory
-    {
-        return new ThrottleFactory(static::createStore());
+        return new ThrottleFactory($this->createStore());
     }
 }

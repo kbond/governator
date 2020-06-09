@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Governator\Tests;
+namespace Zenstruck\Governator\Tests\Integration;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\Cache\CacheItem;
@@ -14,13 +14,11 @@ final class Psr6CacheThrottleTest extends ThrottleTest
 {
     protected static function clockMockClasses(): iterable
     {
-        yield from parent::clockMockClasses();
-
         yield ArrayAdapter::class;
         yield CacheItem::class;
     }
 
-    protected static function createStore(): Store
+    protected function createStore(): Store
     {
         return new Psr6CacheStore(new ArrayAdapter());
     }

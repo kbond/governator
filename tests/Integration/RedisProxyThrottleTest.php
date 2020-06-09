@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Governator\Tests;
+namespace Zenstruck\Governator\Tests\Integration;
 
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\Cache\Traits\RedisProxy;
@@ -14,12 +14,10 @@ final class RedisProxyThrottleTest extends ThrottleTest
 {
     protected static function clockMockClasses(): iterable
     {
-        yield from parent::clockMockClasses();
-
         yield RedisStore::class;
     }
 
-    protected static function createStore(): Store
+    protected function createStore(): Store
     {
         $connection = RedisAdapter::createConnection('redis://127.0.0.1?lazy=true');
 

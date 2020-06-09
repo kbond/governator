@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Governator\Tests;
+namespace Zenstruck\Governator\Tests\Integration;
 
 use Zenstruck\Governator\Store;
 use Zenstruck\Governator\Store\RedisStore;
@@ -12,12 +12,10 @@ final class RedisThrottleTest extends ThrottleTest
 {
     protected static function clockMockClasses(): iterable
     {
-        yield from parent::clockMockClasses();
-
         yield RedisStore::class;
     }
 
-    protected static function createStore(): Store
+    protected function createStore(): Store
     {
         $client = new \Redis();
         $client->connect('127.0.0.1');

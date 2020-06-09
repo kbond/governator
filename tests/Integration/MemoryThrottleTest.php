@@ -1,6 +1,6 @@
 <?php
 
-namespace Zenstruck\Governator\Tests;
+namespace Zenstruck\Governator\Tests\Integration;
 
 use Zenstruck\Governator\Store;
 use Zenstruck\Governator\Store\MemoryStore;
@@ -10,7 +10,7 @@ use Zenstruck\Governator\Store\MemoryStore;
  */
 final class MemoryThrottleTest extends ThrottleTest
 {
-    protected static function createStore(): Store
+    protected function createStore(): Store
     {
         return new MemoryStore();
     }
