@@ -13,6 +13,13 @@ use Zenstruck\Governator\Store\Psr16CacheStore;
  */
 final class Psr16CacheThrottleTest extends ThrottleTest
 {
+    public static function setUpBeforeClass(): void
+    {
+        if (!\class_exists(Psr16Cache::class)) {
+            self::markTestSkipped('Psr16Cache not available.');
+        }
+    }
+
     protected static function clockMockClasses(): iterable
     {
         yield ArrayAdapter::class;
