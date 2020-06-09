@@ -12,6 +12,10 @@ final class RedisClusterProxyTest extends BaseRedisThrottleTest
 {
     public static function setUpBeforeClass(): void
     {
+        if (!\class_exists(RedisClusterProxy::class)) {
+            self::markTestSkipped('The RedisClusterProxy class is required.');
+        }
+
         if (!\class_exists('RedisCluster')) {
             self::markTestSkipped('The RedisCluster class is required.');
         }
