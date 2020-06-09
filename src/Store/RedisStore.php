@@ -33,9 +33,9 @@ final class RedisStore implements Store
 
     public function hit(Key $key): Counter
     {
-        $results = $this->getResults($key);
+        [,$resetsAt, $score] = $this->getResults($key);
 
-        return new Counter($key->limit() - $results[2], $results[1]);
+        return new Counter($key->limit() - $score, $resetsAt);
     }
 
     public function reset(Key $key): void
@@ -45,7 +45,13 @@ final class RedisStore implements Store
 
     private function getResults(Key $key): array
     {
-        $resource = (string) $key;
+        $args = [
+            (string) $key,
+            microtime(true),
+            time(),
+            $key->ttl(),
+            $key->limit(),
+        ];
 
         if (
             $this->client instanceof \Redis ||
@@ -53,34 +59,14 @@ final class RedisStore implements Store
             $this->client instanceof RedisProxy ||
             $this->client instanceof RedisClusterProxy
         ) {
-            return $this->client->eval(
-                self::luaScript(),
-                [
-                    $resource,
-                    microtime(true),
-                    time(),
-                    $key->ttl(),
-                    $key->limit(),
-                ],
-                1
-            );
+            return $this->client->eval(self::luaScript(), $args, 1);
         }
 
         if ($this->client instanceof \RedisArray) {
-            return $this->client->_instance($this->client->_target($key->resource()))->eval(
-                self::luaScript(),
-                [
-                    $resource,
-                    microtime(true),
-                    time(),
-                    $key->ttl(),
-                    $key->limit(),
-                ],
-                1
-            );
+            return $this->client->_instance($this->client->_target((string) $key))->eval(self::luaScript(), $args, 1);
         }
 
-        return $this->client->eval(self::luaScript(), 1, $resource, microtime(true), time(), $key->ttl(), $key->limit());
+        return $this->client->eval(self::luaScript(), 1, ...$args);
     }
 
     /**
