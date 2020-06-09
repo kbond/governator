@@ -16,12 +16,12 @@ final class RedisStore implements Store
     private $client;
 
     /**
-     * @param \Redis|ClientInterface|RedisProxy $client
+     * @param \Redis|\RedisArray|ClientInterface|RedisProxy $client
      */
     public function __construct($client)
     {
-        if (!$client instanceof \Redis && !$client instanceof ClientInterface && !$client instanceof RedisProxy) {
-            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be Redis, Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
+        if (!$client instanceof \Redis && !$client instanceof \RedisArray && !$client instanceof ClientInterface && !$client instanceof RedisProxy) {
+            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be \Redis, \RedisArray, Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
         }
 
         $this->client = $client;
@@ -41,13 +41,16 @@ final class RedisStore implements Store
 
     private function getResults(Key $key): array
     {
+        $resource = (string) $key;
+
         if (
             $this->client instanceof \Redis ||
             $this->client instanceof RedisProxy
         ) {
             return $this->client->eval(
-                self::luaScript(), [
-                    (string) $key,
+                self::luaScript(),
+                [
+                    $resource,
                     microtime(true),
                     time(),
                     $key->ttl(),
@@ -57,7 +60,21 @@ final class RedisStore implements Store
             );
         }
 
-        return $this->client->eval(self::luaScript(), 1, (string) $key, microtime(true), time(), $key->ttl(), $key->limit());
+        if ($this->client instanceof \RedisArray) {
+            return $this->client->_instance($this->client->_target($key->resource()))->eval(
+                self::luaScript(),
+                [
+                    $resource,
+                    microtime(true),
+                    time(),
+                    $key->ttl(),
+                    $key->limit(),
+                ],
+                1
+            );
+        }
+
+        return $this->client->eval(self::luaScript(), 1, $resource, microtime(true), time(), $key->ttl(), $key->limit());
     }
 
     /**

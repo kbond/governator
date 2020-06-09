@@ -1,15 +1,15 @@
 <?php
 
-namespace Zenstruck\Governator\Tests\Integration;
+namespace Zenstruck\Governator\Tests\Integration\Redis;
 
-use Predis\Client;
 use Zenstruck\Governator\Store;
 use Zenstruck\Governator\Store\RedisStore;
+use Zenstruck\Governator\Tests\Integration\ThrottleTest;
 
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class PredisThrottleTest extends ThrottleTest
+abstract class BaseRedisThrottleTest extends ThrottleTest
 {
     protected static function clockMockClasses(): iterable
     {
@@ -18,6 +18,8 @@ final class PredisThrottleTest extends ThrottleTest
 
     protected function createStore(): Store
     {
-        return new RedisStore(new Client());
+        return new RedisStore($this->createConnection());
     }
+
+    abstract protected function createConnection(): object;
 }
