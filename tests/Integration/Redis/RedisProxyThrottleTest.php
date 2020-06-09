@@ -24,7 +24,7 @@ final class RedisProxyThrottleTest extends ThrottleTest
 
     protected function createStore(): Store
     {
-        $connection = RedisAdapter::createConnection('redis://'.\getenv('REDIS_HOST').'?lazy=true');
+        $connection = RedisAdapter::createConnection('redis://'.\getenv('REDIS_HOST'), ['lazy' => true]);
 
         if (!$connection instanceof RedisProxy) {
             throw new \RuntimeException('Expected instance of '.RedisProxy::class);

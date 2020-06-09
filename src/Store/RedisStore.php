@@ -3,12 +3,16 @@
 namespace Zenstruck\Governator\Store;
 
 use Predis\ClientInterface;
+use Symfony\Component\Cache\Traits\RedisClusterProxy;
 use Symfony\Component\Cache\Traits\RedisProxy;
 use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Key;
 use Zenstruck\Governator\Store;
 
 /**
+ * @see https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Lock/Store/RedisStore.php
+ *
+ * @author Jérémy Derussé <jeremy@derusse.com>
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class RedisStore implements Store
@@ -20,7 +24,7 @@ final class RedisStore implements Store
      */
     public function __construct($client)
     {
-        if (!$client instanceof \Redis && !$client instanceof \RedisArray && !$client instanceof \RedisCluster && !$client instanceof ClientInterface && !$client instanceof RedisProxy) {
+        if (!$client instanceof \Redis && !$client instanceof \RedisArray && !$client instanceof \RedisCluster && !$client instanceof ClientInterface && !$client instanceof RedisProxy && !$client instanceof RedisClusterProxy) {
             throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be \Redis, \RedisArray, \RedisCluster or Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
         }
 
@@ -46,7 +50,8 @@ final class RedisStore implements Store
         if (
             $this->client instanceof \Redis ||
             $this->client instanceof \RedisCluster ||
-            $this->client instanceof RedisProxy
+            $this->client instanceof RedisProxy ||
+            $this->client instanceof RedisClusterProxy
         ) {
             return $this->client->eval(
                 self::luaScript(),
