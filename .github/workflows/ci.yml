@@ -10,6 +10,11 @@ jobs:
   tests:
     name: PHP ${{ matrix.php }} - ${{ matrix.stability }}
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:6.0.0
+        ports:
+          - 6379:6379
     strategy:
       fail-fast: true
       matrix:
@@ -24,6 +29,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
+          extensions: redis
 
       - name: Cache dependencies
         uses: actions/cache@v1
@@ -36,10 +42,17 @@ jobs:
 
       - name: Run tests
         run: vendor/bin/phpunit -v
+        env:
+          REDIS_HOST: localhost
 
   code-coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:6.0.0
+        ports:
+          - 6379:6379
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -49,6 +62,7 @@ jobs:
         with:
           php-version: 7.4
           coverage: xdebug
+          extensions: redis
 
       - name: Cache dependencies
         uses: actions/cache@v1
@@ -61,6 +75,8 @@ jobs:
 
       - name: Run code coverage
         run: vendor/bin/phpunit -v --coverage-text --coverage-clover=coverage.clover
+        env:
+          REDIS_HOST: localhost
 
 #      - name: Send code coverage
 #        run: |
