@@ -8,15 +8,17 @@ namespace Zenstruck\Governator;
 final class ThrottleFactory
 {
     private Store $store;
+    private string $prefix;
 
-    public function __construct(Store $store)
+    public function __construct(Store $store, string $prefix = 'throttle_')
     {
         $this->store = $store;
+        $this->prefix = $prefix;
     }
 
     public function create(string $resource, int $limit, int $ttl): Throttle
     {
-        return new Throttle($this->store, new Key($resource, $limit, $ttl));
+        return new Throttle($this->store, new Key($this->prefix.$resource, $limit, $ttl));
     }
 
     public function throttle(string $resource): ThrottleBuilder

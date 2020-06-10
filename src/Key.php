@@ -20,7 +20,7 @@ final class Key
 
     public function __toString(): string
     {
-        return 'throttle_'.$this->resource.$this->limit.$this->ttl;
+        return $this->resource.$this->limit.$this->ttl;
     }
 
     public function createCounter(): Counter
