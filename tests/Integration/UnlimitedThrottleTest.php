@@ -61,4 +61,9 @@ final class UnlimitedThrottleTest extends TestCase
         $this->assertSame(4, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
     }
+
+    protected static function clockMockClasses(): iterable
+    {
+        yield UnlimitedStore::class;
+    }
 }

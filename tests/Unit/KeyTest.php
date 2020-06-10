@@ -12,12 +12,22 @@ final class KeyTest extends TestCase
 {
     /**
      * @test
+     */
+    public function non_whole_ttl_is_ceiled(): void
+    {
+        $key = new Key('foo', 10, 0.3);
+
+        $this->assertSame(1.0, $key->ttl());
+    }
+
+    /**
+     * @test
      * @dataProvider invalidNumberProvider
      */
     public function ttl_must_be_positive($number): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('A positive integer is required for a throttle\'s "TTL".');
+        $this->expectExceptionMessage('A positive number is required for a throttle\'s "TTL".');
 
         new Key('foo', 5, $number);
     }
@@ -49,6 +59,6 @@ final class KeyTest extends TestCase
     {
         yield [0];
         yield [-1];
-        yield [0.1];
+        yield [-0.1];
     }
 }

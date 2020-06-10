@@ -10,7 +10,7 @@ final class ThrottleBuilder
     private ThrottleFactory $factory;
     private string $resource;
     private ?int $limit = null;
-    private ?int $ttl = null;
+    private ?float $ttl = null;
 
     public function __construct(ThrottleFactory $factory, string $resource)
     {
@@ -25,7 +25,7 @@ final class ThrottleBuilder
         return $this;
     }
 
-    public function every(int $seconds): self
+    public function every(float $seconds): self
     {
         $this->ttl = $seconds;
 
@@ -35,7 +35,7 @@ final class ThrottleBuilder
     public function create(): Throttle
     {
         if (null === $this->limit) {
-            throw new \LogicException(\sprintf('You must set a "Limit" for the throttle via "%s::allow($limit)"', self::class)); // todo improve
+            throw new \LogicException(\sprintf('You must set a "Limit" for the throttle via "%s::allow($limit)"', self::class));
         }
 
         if (null === $this->ttl) {

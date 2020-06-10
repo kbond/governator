@@ -131,6 +131,37 @@ abstract class ThrottleTest extends TestCase
     /**
      * @test
      */
+    public function non_whole_number_ttl_is_ceiled(): void
+    {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 1.3;
+        $factory = $this->factory();
+        $factory->create($resource, $limit, $ttl)->reset();
+
+        $quota = $factory->create($resource, $limit, $ttl)->hit();
+
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+
+        $quota = $factory->create($resource, $limit, $ttl)->hit();
+
+        $this->assertSame(2, $quota->hits());
+        $this->assertSame(0, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+
+        sleep($quota->resetsIn());
+
+        $quota = $factory->create($resource, $limit, $ttl)->hit();
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+    }
+
+    /**
+     * @test
+     */
     public function block_returns_quota_right_away_if_not_exceeded(): void
     {
         $resource = 'foo';

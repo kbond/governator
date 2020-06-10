@@ -8,9 +8,9 @@ namespace Zenstruck\Governator;
 final class Counter
 {
     private int $hits;
-    private int $resetsAt;
+    private float $resetsAt;
 
-    public function __construct(int $hits, int $resetsAt)
+    public function __construct(int $hits, float $resetsAt)
     {
         $this->hits = $hits;
         $this->resetsAt = $resetsAt;

@@ -24,7 +24,7 @@ final class ThrottleFactory
         return new self(StoreFactory::create($connection), $prefix);
     }
 
-    public function create(string $resource, int $limit, int $ttl): Throttle
+    public function create(string $resource, int $limit, float $ttl): Throttle
     {
         return new Throttle($this->store, new Key($resource, $limit, $ttl, $this->prefix));
     }
