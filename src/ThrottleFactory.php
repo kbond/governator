@@ -16,7 +16,7 @@ final class ThrottleFactory
 
     public function create(string $resource, int $limit, int $ttl): Throttle
     {
-        return new Throttle($this->store, $resource, $limit, $ttl);
+        return new Throttle($this->store, new Key($resource, $limit, $ttl));
     }
 
     public function throttle(string $resource): ThrottleBuilder

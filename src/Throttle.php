@@ -10,16 +10,12 @@ use Zenstruck\Governator\Exception\QuotaExceeded;
 final class Throttle
 {
     private Store $store;
-    private string $resource;
-    private int $ttl;
-    private int $limit;
+    private Key $key;
 
-    public function __construct(Store $store, string $resource, int $limit, int $ttl)
+    public function __construct(Store $store, Key $key)
     {
         $this->store = $store;
-        $this->resource = $resource;
-        $this->ttl = $ttl;
-        $this->limit = $limit;
+        $this->key = $key;
     }
 
     /**
@@ -27,7 +23,7 @@ final class Throttle
      */
     public function hit(): Quota
     {
-        $quota = new Quota($this->limit, $this->store->hit($this->key()));
+        $quota = new Quota($this->key->limit(), $this->store->hit($this->key));
 
         if ($quota->hasBeenExceeded()) {
             throw new QuotaExceeded($quota);
@@ -56,11 +52,6 @@ final class Throttle
 
     public function reset(): void
     {
-        $this->store->reset($this->key());
-    }
-
-    private function key(): Key
-    {
-        return new Key($this->resource, $this->limit, $this->ttl);
+        $this->store->reset($this->key);
     }
 }
