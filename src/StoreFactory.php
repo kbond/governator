@@ -4,6 +4,7 @@ namespace Zenstruck\Governator;
 
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\SimpleCache\CacheInterface;
+use Symfony\Component\Cache\Adapter\AbstractAdapter;
 use Symfony\Component\Cache\Traits\RedisClusterProxy;
 use Symfony\Component\Cache\Traits\RedisProxy;
 use Zenstruck\Governator\Store\MemoryStore;
@@ -48,6 +49,13 @@ final class StoreFactory
                 return new MemoryStore();
             case 'unlimited' === $connection:
                 return new UnlimitedStore();
+            case 0 === \strpos($connection, 'redis:'):
+            case 0 === \strpos($connection, 'rediss:'):
+                if (!\class_exists(AbstractAdapter::class)) {
+                    throw new \InvalidArgumentException(\sprintf('Unsupported DSN "%s". Try running "composer require symfony/cache".', $connection));
+                }
+
+                return new RedisStore(AbstractAdapter::createConnection($connection, ['lazy' => true]));
         }
 
         throw new \InvalidArgumentException(\sprintf('Unsupported Connection: "%s".', $connection));

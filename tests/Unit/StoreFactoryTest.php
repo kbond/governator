@@ -41,6 +41,7 @@ final class StoreFactoryTest extends TestCase
         yield [$this->createMock(\RedisCluster::class), RedisStore::class];
         yield [$this->createMock(ClientInterface::class), RedisStore::class];
         yield [$this->createMock(RedisProxy::class), RedisStore::class];
+        yield ['redis://localhost', RedisStore::class];
 
         if (\class_exists(RedisClusterProxy::class)) {
             yield [$this->createMock(RedisClusterProxy::class), RedisStore::class];
