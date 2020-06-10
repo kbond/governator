@@ -25,7 +25,7 @@ final class RedisStore implements Store
     public function __construct(object $client)
     {
         if (!$client instanceof \Redis && !$client instanceof \RedisArray && !$client instanceof \RedisCluster && !$client instanceof ClientInterface && !$client instanceof RedisProxy && !$client instanceof RedisClusterProxy) {
-            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be \Redis, \RedisArray, \RedisCluster or Predis\ClientInterface, "%s" given.', __METHOD__, get_debug_type($client)));
+            throw new \InvalidArgumentException(\sprintf('"%s()" expects parameter 1 to be \Redis, \RedisArray, \RedisCluster or Predis\ClientInterface, "%s" given.', __METHOD__, \is_object($client) ? \get_class($client) : \gettype($client)));
         }
 
         $this->client = $client;
