@@ -16,6 +16,14 @@ final class ThrottleFactory
         $this->prefix = $prefix;
     }
 
+    /**
+     * @param string|object $connection
+     */
+    public static function for($connection, string $prefix = 'throttle_'): self
+    {
+        return new self(StoreFactory::create($connection), $prefix);
+    }
+
     public function create(string $resource, int $limit, int $ttl): Throttle
     {
         return new Throttle($this->store, new Key($resource, $limit, $ttl, $this->prefix));
