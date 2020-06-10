@@ -11,9 +11,21 @@ final class Key
     private int $limit;
     private int $ttl;
 
-    public function __construct(string $resource, int $limit, int $ttl)
+    public function __construct(string $resource, int $limit, int $ttl, string $prefix = '')
     {
-        $this->resource = $resource;
+        if (empty($resource)) {
+            throw new \InvalidArgumentException('A non-empty string is required for a throttle\'s "resource".');
+        }
+
+        if ($limit < 1) {
+            throw new \InvalidArgumentException('A positive integer is required for a throttle\'s "limit".');
+        }
+
+        if ($ttl < 1) {
+            throw new \InvalidArgumentException('A positive integer is required for a throttle\'s "TTL".');
+        }
+
+        $this->resource = $prefix.$resource;
         $this->limit = $limit;
         $this->ttl = $ttl;
     }
