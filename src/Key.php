@@ -28,11 +28,6 @@ final class Key
         return new Counter(0, time() + $this->ttl);
     }
 
-    public function resource(): string
-    {
-        return $this->resource;
-    }
-
     public function limit(): int
     {
         return $this->limit;

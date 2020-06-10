@@ -106,6 +106,12 @@ abstract class ThrottleTest extends TestCase
             $this->assertSame(6, $exception->hits());
             $this->assertSame(0, $exception->remaining());
             $this->assertSame(2, $exception->resetsIn());
+            $this->assertSame(time() + 2, $exception->resetsAt()->getTimestamp());
+            $this->assertSame(5, $exception->quota()->limit());
+            $this->assertSame(6, $exception->quota()->hits());
+            $this->assertSame(0, $exception->quota()->remaining());
+            $this->assertSame(2, $exception->quota()->resetsIn());
+            $this->assertSame(time() + 2, $exception->quota()->resetsAt()->getTimestamp());
 
             sleep($exception->resetsIn());
 
@@ -223,7 +229,8 @@ abstract class ThrottleTest extends TestCase
      */
     public function can_reset_throttle(): void
     {
-        $throttle = $this->factory()->create('foo', 5, 60);
+        $factory = $this->factory();
+        $throttle = $factory->create('foo', 5, 60);
         $throttle->reset();
 
         $this->assertSame(4, $throttle->hit()->remaining());
@@ -232,6 +239,12 @@ abstract class ThrottleTest extends TestCase
         $throttle->reset();
 
         $this->assertSame(4, $throttle->hit()->remaining());
+        $this->assertSame(3, $throttle->hit()->remaining());
+
+        $factory->throttle('foo')->allow(5)->every(60)->reset();
+
+        $this->assertSame(4, $throttle->hit()->remaining());
+        $this->assertSame(3, $throttle->hit()->remaining());
     }
 
     abstract protected function createStore(): Store;

@@ -35,11 +35,11 @@ final class ThrottleBuilder
     public function create(): Throttle
     {
         if (null === $this->limit) {
-            throw new \LogicException('A "limit" has not been set.'); // todo improve
+            throw new \LogicException(\sprintf('You must set a "Limit" for the throttle via "%s::allow($limit)"', self::class)); // todo improve
         }
 
         if (null === $this->ttl) {
-            throw new \LogicException('A "TTL" has not been set.'); // todo improve
+            throw new \LogicException(\sprintf('You must set a "TTL" for the throttle via "%s::every($ttl)"', self::class));
         }
 
         return $this->factory->create($this->resource, $this->limit, $this->ttl);
