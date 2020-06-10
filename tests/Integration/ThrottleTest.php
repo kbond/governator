@@ -32,6 +32,7 @@ abstract class ThrottleTest extends TestCase
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
+        $this->assertSame(time() + 60, $quota->resetsAt()->getTimestamp());
 
         $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->create()->hit();
 
@@ -40,12 +41,14 @@ abstract class ThrottleTest extends TestCase
         $this->assertSame(3, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
 
+        sleep(2);
+
         $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit();
 
         $this->assertSame(5, $quota->limit());
         $this->assertSame(3, $quota->hits());
         $this->assertSame(2, $quota->remaining());
-        $this->assertSame(60, $quota->resetsIn());
+        $this->assertSame(58, $quota->resetsIn());
     }
 
     /**
