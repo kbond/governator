@@ -25,7 +25,7 @@ final class Key
         }
 
         if ($ttl < 1) {
-            throw new \InvalidArgumentException('A positive number is required for a throttle\'s "TTL".');
+            throw new \InvalidArgumentException('A positive number is required for a throttle\'s "time to live".');
         }
 
         $this->resource = $prefix.$resource;

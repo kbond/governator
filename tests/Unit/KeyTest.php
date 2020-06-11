@@ -27,7 +27,7 @@ final class KeyTest extends TestCase
     public function ttl_must_be_positive($number): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('A positive number is required for a throttle\'s "TTL".');
+        $this->expectExceptionMessage('A positive number is required for a throttle\'s "time to live".');
 
         new Key('foo', 5, $number);
     }

@@ -19,7 +19,11 @@ final class Throttle
     }
 
     /**
-     * @throws QuotaExceeded
+     * "Hits" the throttle, increasing its hit count by 1.
+     *
+     * @return Quota Information on the current state of the throttle
+     *
+     * @throws QuotaExceeded If the current hit exceeds the throttle's limit
      */
     public function hit(): Quota
     {
@@ -33,7 +37,18 @@ final class Throttle
     }
 
     /**
-     * @throws QuotaExceeded
+     * "Hits" the throttle, increasing its hit count by 1. If the throttle's quota is exceeded and
+     * it resets in less than or equal to the passed time, block the process until the throttle is reset,
+     * then "hit" it.
+     *
+     * DOES NOT BLOCK the process if the throttle's quota is exceeded and its time until reset is greater
+     * than the passed time.
+     *
+     * @param float $for Max number of seconds to block the process waiting for the throttle to reset.
+     *                   Partial seconds are rounded up to the next whole second.
+     *
+     * @throws QuotaExceeded If the current hit exceeds the throttle's limit and the passed number of
+     *                       seconds is less then the throttle's "time to live"
      */
     public function block(float $for): Quota
     {
@@ -53,6 +68,9 @@ final class Throttle
         return $this->hit();
     }
 
+    /**
+     * Resets the throttle.
+     */
     public function reset(): void
     {
         $this->store->reset($this->key);

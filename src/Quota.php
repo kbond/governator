@@ -3,6 +3,8 @@
 namespace Zenstruck\Governator;
 
 /**
+ * Information on the current state of the throttle.
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class Quota
@@ -16,26 +18,41 @@ final class Quota
         $this->counter = $counter;
     }
 
+    /**
+     * @return int The throttle's limit
+     */
     public function limit(): int
     {
         return $this->limit;
     }
 
+    /**
+     * @return int The number of throttle hits
+     */
     public function hits(): int
     {
         return $this->counter->hits();
     }
 
+    /**
+     * @return int Number of allowed hits before the throttle resets (never negative)
+     */
     public function remaining(): int
     {
         return \max(0, $this->limit - $this->hits());
     }
 
+    /**
+     * @return \DateTimeImmutable When the throttle resets (never in the past)
+     */
     public function resetsAt(): \DateTimeImmutable
     {
         return \DateTimeImmutable::createFromFormat('U', $this->counter->resetsAt());
     }
 
+    /**
+     * @return int Number of seconds until the throttle resets (never negative)
+     */
     public function resetsIn(): int
     {
         return $this->counter->resetsIn();

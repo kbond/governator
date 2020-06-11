@@ -21,7 +21,11 @@ use Zenstruck\Governator\Store\UnlimitedStore;
 final class StoreFactory
 {
     /**
+     * Create a Throttle Store for passed connection DSN/object.
+     *
      * @param string|object $connection
+     *
+     * @throws \InvalidArgumentException If not capable of handling passed connection
      */
     public static function create($connection): Store
     {
