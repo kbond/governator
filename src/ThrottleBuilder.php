@@ -75,7 +75,7 @@ final class ThrottleBuilder
      *
      * @see Throttle::block()
      */
-    public function block(int $for): Quota
+    public function block(float $for): Quota
     {
         return $this->create()->block($for);
     }

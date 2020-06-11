@@ -282,6 +282,29 @@ abstract class ThrottleTest extends TestCase
     /**
      * @test
      */
+    public function partial_seconds_passed_to_builder_block_are_rounded_up_to_next_whole_second(): void
+    {
+        $resource = 'foo';
+        $limit = 2;
+        $ttl = 2;
+        $factory = $this->factory();
+        $factory->create($resource, $limit, $ttl)->reset();
+
+        $start = time();
+        $factory->create($resource, $limit, $ttl)->hit();
+        $factory->create($resource, $limit, $ttl)->hit();
+
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->block(1.1);
+
+        $this->assertSame($start + 2, time());
+        $this->assertSame(1, $quota->hits());
+        $this->assertSame(1, $quota->remaining());
+        $this->assertSame(2, $quota->resetsIn());
+    }
+
+    /**
+     * @test
+     */
     public function can_reset_throttle(): void
     {
         $factory = $this->factory();
