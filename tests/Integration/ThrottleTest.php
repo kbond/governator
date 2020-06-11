@@ -34,7 +34,7 @@ abstract class ThrottleTest extends TestCase
         $this->assertSame(60, $quota->resetsIn());
         $this->assertSame(time() + 60, $quota->resetsAt()->getTimestamp());
 
-        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->create()->hit();
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit();
 
         $this->assertSame(5, $quota->limit());
         $this->assertSame(2, $quota->hits());
@@ -173,7 +173,7 @@ abstract class ThrottleTest extends TestCase
 
         $start = time();
 
-        $quota = $factory->create($resource, $limit, $ttl)->block(10);
+        $quota = $factory->create($resource, $limit, $ttl)->hit(10);
 
         $this->assertSame($start, time());
         $this->assertSame(1, $quota->hits());
@@ -196,7 +196,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
         $factory->create($resource, $limit, $ttl)->hit();
 
-        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->create()->block(10);
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit(10);
 
         $this->assertSame($start + 2, time());
         $this->assertSame(1, $quota->hits());
@@ -219,7 +219,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
         $factory->create($resource, $limit, $ttl)->hit();
 
-        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->block(2);
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit(2);
 
         $this->assertSame($start + 2, time());
         $this->assertSame(1, $quota->hits());
@@ -243,7 +243,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
 
         try {
-            $factory->create($resource, $limit, $ttl)->block(2);
+            $factory->create($resource, $limit, $ttl)->hit(2);
         } catch (QuotaExceeded $exception) {
             $this->assertSame($start, time());
             $this->assertSame(3, $exception->hits());
@@ -271,7 +271,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
         $factory->create($resource, $limit, $ttl)->hit();
 
-        $quota = $factory->create($resource, $limit, $ttl)->block(1.1);
+        $quota = $factory->create($resource, $limit, $ttl)->hit(1.1);
 
         $this->assertSame($start + 2, time());
         $this->assertSame(1, $quota->hits());
@@ -294,7 +294,7 @@ abstract class ThrottleTest extends TestCase
         $factory->create($resource, $limit, $ttl)->hit();
         $factory->create($resource, $limit, $ttl)->hit();
 
-        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->block(1.1);
+        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit(1.1);
 
         $this->assertSame($start + 2, time());
         $this->assertSame(1, $quota->hits());

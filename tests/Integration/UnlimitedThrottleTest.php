@@ -54,7 +54,7 @@ final class UnlimitedThrottleTest extends TestCase
         $throttle = (new ThrottleFactory(new UnlimitedStore()))->create('foo', 5, 60);
         $start = time();
 
-        $quota = $throttle->block(5);
+        $quota = $throttle->hit(5);
 
         $this->assertSame(time(), $start);
         $this->assertSame(1, $quota->hits());

@@ -19,53 +19,37 @@ final class Throttle
     }
 
     /**
-     * "Hits" the throttle, increasing its hit count by 1.
-     *
-     * @return Quota Information on the current state of the throttle
-     *
-     * @throws QuotaExceeded If the current hit exceeds the throttle's limit
-     */
-    public function hit(): Quota
-    {
-        $quota = new Quota($this->key->limit(), $this->store->hit($this->key));
-
-        if ($quota->hasBeenExceeded()) {
-            throw new QuotaExceeded($quota);
-        }
-
-        return $quota;
-    }
-
-    /**
      * "Hits" the throttle, increasing its hit count by 1. If the throttle's quota is exceeded and
      * it resets in less than or equal to the passed time, block the process until the throttle is reset,
-     * then "hit" it.
+     * then "hit" it again.
      *
      * DOES NOT BLOCK the process if the throttle's quota is exceeded and its time until reset is greater
      * than the passed time.
      *
-     * @param float $for Max number of seconds to block the process waiting for the throttle to reset.
-     *                   Partial seconds are rounded up to the next whole second.
+     * @param float $blockFor Max number of seconds to block the process waiting for the throttle to reset.
+     *                        Partial seconds are rounded up to the next whole second.
      *
-     * @throws QuotaExceeded If the current hit exceeds the throttle's limit and the passed number of
-     *                       seconds is less then the throttle's "time to live"
+     * @return Quota Information on the current state of the throttle
+     *
+     * @throws QuotaExceeded If the current hit exceeds the throttle's limit and the passed time
+     *                       is less then the throttle's "time to live"
      */
-    public function block(float $for): Quota
+    public function hit(float $blockFor = 0.0): Quota
     {
         // TODO Remove if ever allow partial second blocking
-        $for = (float) \ceil($for);
+        $blockFor = (float) \ceil($blockFor);
 
         try {
-            return $this->hit();
+            return $this->hitStore();
         } catch (QuotaExceeded $exception) {
-            if ($exception->resetsIn() > $for) {
+            if ($exception->resetsIn() > $blockFor) {
                 throw $exception;
             }
         }
 
         sleep($exception->resetsIn());
 
-        return $this->hit();
+        return $this->hitStore();
     }
 
     /**
@@ -74,5 +58,16 @@ final class Throttle
     public function reset(): void
     {
         $this->store->reset($this->key);
+    }
+
+    private function hitStore(): Quota
+    {
+        $quota = new Quota($this->key->limit(), $this->store->hit($this->key));
+
+        if ($quota->hasBeenExceeded()) {
+            throw new QuotaExceeded($quota);
+        }
+
+        return $quota;
     }
 }

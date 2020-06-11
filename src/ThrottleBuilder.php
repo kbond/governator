@@ -60,24 +60,14 @@ final class ThrottleBuilder
     }
 
     /**
-     * Create the throttle for the current configuration and "hit" it.
-     *
-     * @see Throttle::hit()
-     */
-    public function hit(): Quota
-    {
-        return $this->create()->hit();
-    }
-
-    /**
      * Create the throttle for the current configuration and "hit" it, potentially blocking the process
      * for the passed time if it's quota has been exceeded.
      *
-     * @see Throttle::block()
+     * @see Throttle::hit()
      */
-    public function block(float $for): Quota
+    public function hit(float $blockFor = 0.0): Quota
     {
-        return $this->create()->block($for);
+        return $this->create()->hit($blockFor);
     }
 
     /**
