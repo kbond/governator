@@ -166,7 +166,7 @@ abstract class BaseThrottleTest extends TestCase
     /**
      * @test
      */
-    public function block_returns_quota_right_away_if_not_exceeded(): void
+    public function hit_with_block_returns_quota_right_away_if_not_exceeded(): void
     {
         $resource = 'foo';
         $limit = 2;
@@ -233,7 +233,7 @@ abstract class BaseThrottleTest extends TestCase
     /**
      * @test
      */
-    public function block_throws_quota_exceeded_exception_right_away_if_not_going_to_be_available_within_passed_time(): void
+    public function hit_with_block_throws_quota_exceeded_exception_right_away_if_not_going_to_be_available_within_passed_time(): void
     {
         $resource = 'foo';
         $limit = 2;
@@ -262,7 +262,7 @@ abstract class BaseThrottleTest extends TestCase
     /**
      * @test
      */
-    public function partial_seconds_passed_to_block_are_rounded_up_to_next_whole_second(): void
+    public function partial_seconds_passed_to_hit_are_rounded_up_to_next_whole_second(): void
     {
         $resource = 'foo';
         $limit = 2;
@@ -285,7 +285,7 @@ abstract class BaseThrottleTest extends TestCase
     /**
      * @test
      */
-    public function partial_seconds_passed_to_builder_block_are_rounded_up_to_next_whole_second(): void
+    public function partial_seconds_passed_to_builder_hit_are_rounded_up_to_next_whole_second(): void
     {
         $resource = 'foo';
         $limit = 2;

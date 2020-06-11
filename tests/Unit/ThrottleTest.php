@@ -16,7 +16,7 @@ final class ThrottleTest extends TestCase
     /**
      * @test
      */
-    public function negative_blocks_for_has_same_effect_as_zero(): void
+    public function negative_block_has_same_effect_as_zero(): void
     {
         $throttle = new Throttle(new MemoryStore(), new Key('foo', 1, 10));
 
