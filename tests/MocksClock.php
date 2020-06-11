@@ -35,7 +35,7 @@ trait MocksClock
      */
     public static function tearDownClockMock(): void
     {
-        ClockMock::withClockMock(true);
+        ClockMock::withClockMock(false);
     }
 
     /**
