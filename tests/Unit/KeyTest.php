@@ -13,7 +13,7 @@ final class KeyTest extends TestCase
     /**
      * @test
      */
-    public function non_whole_ttl_is_ceiled(): void
+    public function partial_second_ttl_is_rounded_up_to_next_whole_second(): void
     {
         $key = new Key('foo', 10, 0.3);
 

@@ -35,8 +35,11 @@ final class Throttle
     /**
      * @throws QuotaExceeded
      */
-    public function block(int $for): Quota
+    public function block(float $for): Quota
     {
+        // TODO Remove if ever allow partial second blocking
+        $for = (float) \ceil($for);
+
         try {
             return $this->hit();
         } catch (QuotaExceeded $exception) {

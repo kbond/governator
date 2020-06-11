@@ -17,7 +17,7 @@ final class CounterTest extends TestCase
      * @test
      * @dataProvider resetsAtProvider
      */
-    public function resets_at_ceiled_to_next_second($resetsAt, $expectedResetsAt): void
+    public function resets_at_rounded_up_to_next_whole_second($resetsAt, $expectedResetsAt): void
     {
         $this->assertSame($expectedResetsAt, (new Counter(10, $resetsAt + time()))->resetsIn());
     }
