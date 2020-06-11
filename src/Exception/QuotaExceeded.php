@@ -15,7 +15,7 @@ final class QuotaExceeded extends \RuntimeException
     {
         $this->quota = $quota;
 
-        parent::__construct(); // todo - set message
+        parent::__construct(\sprintf('Quota Exceeded (%d/%d), resets in %d seconds.', $quota->hits(), $quota->limit(), $quota->resetsIn()));
     }
 
     public function quota(): Quota
