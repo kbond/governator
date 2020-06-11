@@ -7,15 +7,14 @@ use Zenstruck\Governator\Counter;
 use Zenstruck\Governator\Exception\QuotaExceeded;
 use Zenstruck\Governator\Key;
 use Zenstruck\Governator\Quota;
-use Zenstruck\Governator\Tests\MocksClock;
 
 /**
+ * @group time-sensitive
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class QuotaExceededTest extends TestCase
 {
-    use MocksClock;
-
     /**
      * @test
      */

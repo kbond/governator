@@ -25,6 +25,21 @@
     </filter>
 
     <listeners>
-        <listener class="\Symfony\Bridge\PhpUnit\SymfonyTestsListener"/>
+        <listener class="\Symfony\Bridge\PhpUnit\SymfonyTestsListener">
+            <arguments>
+                <array>
+                    <element key="time-sensitive">
+                        <array>
+                            <element key="0"><string>Zenstruck\Governator</string></element>
+                            <element key="1"><string>Zenstruck\Governator\Store</string></element>
+                            <element key="2"><string>Symfony\Component\Cache</string></element>
+                            <element key="3"><string>Symfony\Component\Cache\Traits</string></element>
+                            <element key="4"><string>Symfony\Component\Cache\Adapter</string></element>
+                            <element key="5"><string>Symfony\Component\Cache\Simple</string></element>
+                        </array>
+                    </element>
+                </array>
+            </arguments>
+        </listener>
     </listeners>
 </phpunit>

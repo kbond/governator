@@ -4,16 +4,15 @@ namespace Zenstruck\Governator\Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Governator\Store\UnlimitedStore;
-use Zenstruck\Governator\Tests\MocksClock;
 use Zenstruck\Governator\ThrottleFactory;
 
 /**
+ * @group time-sensitive
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class UnlimitedThrottleTest extends TestCase
 {
-    use MocksClock;
-
     /**
      * @test
      */
@@ -60,10 +59,5 @@ final class UnlimitedThrottleTest extends TestCase
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
-    }
-
-    protected static function clockMockClasses(): iterable
-    {
-        yield UnlimitedStore::class;
     }
 }

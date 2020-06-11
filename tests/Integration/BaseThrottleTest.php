@@ -5,7 +5,6 @@ namespace Zenstruck\Governator\Tests\Integration;
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Governator\Exception\QuotaExceeded;
 use Zenstruck\Governator\Store;
-use Zenstruck\Governator\Tests\MocksClock;
 use Zenstruck\Governator\ThrottleFactory;
 
 /**
@@ -13,8 +12,6 @@ use Zenstruck\Governator\ThrottleFactory;
  */
 abstract class BaseThrottleTest extends TestCase
 {
-    use MocksClock;
-
     /**
      * @test
      */

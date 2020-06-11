@@ -11,11 +11,6 @@ use Zenstruck\Governator\Tests\Integration\BaseThrottleTest;
  */
 abstract class BaseRedisThrottleTest extends BaseThrottleTest
 {
-    protected static function clockMockClasses(): iterable
-    {
-        yield RedisStore::class;
-    }
-
     protected function createStore(): Store
     {
         return new RedisStore($this->createConnection());

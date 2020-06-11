@@ -10,6 +10,7 @@ use Zenstruck\Governator\Tests\Integration\BaseThrottleTest;
 
 /**
  * @requires extension redis
+ * @group time-sensitive
  *
  * @author Kevin Bond <kevinbond@gmail.com>
  */

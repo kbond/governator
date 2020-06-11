@@ -6,6 +6,8 @@ use Zenstruck\Governator\Store;
 use Zenstruck\Governator\Store\MemoryStore;
 
 /**
+ * @group time-sensitive
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class MemoryThrottleTest extends BaseThrottleTest

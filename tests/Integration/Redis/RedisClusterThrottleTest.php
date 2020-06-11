@@ -4,6 +4,7 @@ namespace Zenstruck\Governator\Tests\Integration\Redis;
 
 /**
  * @requires extension redis
+ * @group time-sensitive
  *
  * @author Kevin Bond <kevinbond@gmail.com>
  */

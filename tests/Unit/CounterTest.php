@@ -4,15 +4,14 @@ namespace Zenstruck\Governator\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use Zenstruck\Governator\Counter;
-use Zenstruck\Governator\Tests\MocksClock;
 
 /**
+ * @group time-sensitive
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class CounterTest extends TestCase
 {
-    use MocksClock;
-
     /**
      * @test
      * @dataProvider resetsAtProvider

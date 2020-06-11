@@ -6,6 +6,9 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\Cache\Traits\RedisClusterProxy;
 
 /**
+ * @requires extension redis
+ * @group time-sensitive
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class RedisClusterProxyTest extends BaseRedisThrottleTest

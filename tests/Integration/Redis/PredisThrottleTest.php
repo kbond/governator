@@ -3,6 +3,8 @@
 namespace Zenstruck\Governator\Tests\Integration\Redis;
 
 /**
+ * @group time-sensitive
+ *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
 final class PredisThrottleTest extends BaseRedisThrottleTest
