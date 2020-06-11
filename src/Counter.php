@@ -8,12 +8,12 @@ namespace Zenstruck\Governator;
 final class Counter
 {
     private int $hits;
-    private float $resetsAt;
+    private int $resetsAt;
 
     public function __construct(int $hits, float $resetsAt)
     {
         $this->hits = $hits;
-        $this->resetsAt = $resetsAt;
+        $this->resetsAt = \ceil($resetsAt);
     }
 
     public function hits(): int
@@ -21,9 +21,11 @@ final class Counter
         return $this->hits;
     }
 
-    public function resetsAt(): \DateTimeImmutable
+    public function resetsAt(): int
     {
-        return \DateTimeImmutable::createFromFormat('U', $this->resetsAt);
+        $currentTime = time();
+
+        return $this->resetsAt < $currentTime ? $currentTime : $this->resetsAt;
     }
 
     public function resetsIn(): int

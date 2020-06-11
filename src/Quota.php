@@ -33,7 +33,7 @@ final class Quota
 
     public function resetsAt(): \DateTimeImmutable
     {
-        return $this->counter->resetsAt();
+        return \DateTimeImmutable::createFromFormat('U', $this->counter->resetsAt());
     }
 
     public function resetsIn(): int
