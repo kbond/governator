@@ -62,7 +62,7 @@ final class Throttle
 
     private function hitStore(): Quota
     {
-        $quota = new Quota($this->key->limit(), $this->store->hit($this->key));
+        $quota = new Quota($this->key, $this->store->hit($this->key));
 
         if ($quota->hasBeenExceeded()) {
             throw new QuotaExceeded($quota);

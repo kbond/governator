@@ -9,13 +9,29 @@ namespace Zenstruck\Governator;
  */
 final class Quota
 {
-    private int $limit;
+    private Key $key;
     private Counter $counter;
 
-    public function __construct(int $limit, Counter $counter)
+    public function __construct(Key $key, Counter $counter)
     {
-        $this->limit = $limit;
+        $this->key = $key;
         $this->counter = $counter;
+    }
+
+    /**
+     * @return Key The key used to create the throttle
+     */
+    public function key(): Key
+    {
+        return $this->key;
+    }
+
+    /**
+     * @return string The throttle's unique identifier
+     */
+    public function resource(): string
+    {
+        return $this->key->resource();
     }
 
     /**
@@ -23,7 +39,7 @@ final class Quota
      */
     public function limit(): int
     {
-        return $this->limit;
+        return $this->key->limit();
     }
 
     /**
@@ -39,7 +55,7 @@ final class Quota
      */
     public function remaining(): int
     {
-        return \max(0, $this->limit - $this->hits());
+        return \max(0, $this->limit() - $this->hits());
     }
 
     /**
@@ -60,6 +76,6 @@ final class Quota
 
     public function hasBeenExceeded(): bool
     {
-        return $this->counter->hits() > $this->limit;
+        return $this->counter->hits() > $this->limit();
     }
 }

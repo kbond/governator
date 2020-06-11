@@ -27,6 +27,14 @@ final class QuotaExceeded extends \RuntimeException
     }
 
     /**
+     * @return string The throttle's unique identifier
+     */
+    public function resource(): string
+    {
+        return $this->quota->resource();
+    }
+
+    /**
      * @return int The throttle's limit
      */
     public function limit(): int

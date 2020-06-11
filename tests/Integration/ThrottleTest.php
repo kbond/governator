@@ -28,6 +28,7 @@ abstract class ThrottleTest extends TestCase
 
         $quota = $factory->create($resource, $limit, $ttl)->hit();
 
+        $this->assertSame('foo', $quota->resource());
         $this->assertSame(5, $quota->limit());
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
@@ -103,11 +104,13 @@ abstract class ThrottleTest extends TestCase
             $factory->create($resource, $limit, $ttl)->hit();
         } catch (QuotaExceeded $exception) {
             $this->assertSame('Quota Exceeded (6/5), resets in 2 seconds.', $exception->getMessage());
+            $this->assertSame('foo', $exception->resource());
             $this->assertSame(5, $exception->limit());
             $this->assertSame(6, $exception->hits());
             $this->assertSame(0, $exception->remaining());
             $this->assertSame(2, $exception->resetsIn());
             $this->assertSame(time() + 2, $exception->resetsAt()->getTimestamp());
+            $this->assertSame('foo', $exception->quota()->resource());
             $this->assertSame(5, $exception->quota()->limit());
             $this->assertSame(6, $exception->quota()->hits());
             $this->assertSame(0, $exception->quota()->remaining());

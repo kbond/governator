@@ -61,4 +61,38 @@ final class KeyTest extends TestCase
         yield [-1];
         yield [-0.1];
     }
+
+    /**
+     * @test
+     */
+    public function can_access_resource(): void
+    {
+        $this->assertSame('foo', (new Key('foo', 10, 60))->resource());
+    }
+
+    /**
+     * @test
+     */
+    public function resource_does_not_include_prefix(): void
+    {
+        $this->assertSame('foo', (new Key('foo', 10, 60, 'my-prefix-'))->resource());
+    }
+
+    /**
+     * @test
+     */
+    public function can_convert_to_string(): void
+    {
+        $this->assertSame('foo1060', (string) new Key('foo', 10, 60));
+        $this->assertSame('foo1060', (string) new Key('foo', 10, 60.0));
+        $this->assertSame('foo1060', (string) new Key('foo', 10, 59.1));
+    }
+
+    /**
+     * @test
+     */
+    public function converting_to_string_includes_prefix(): void
+    {
+        $this->assertSame('my-prefix-foo1060', (string) new Key('foo', 10, 60, 'my-prefix-'));
+    }
 }

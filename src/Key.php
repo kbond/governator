@@ -10,6 +10,7 @@ final class Key
     private string $resource;
     private int $limit;
     private float $ttl;
+    private string $prefix;
 
     public function __construct(string $resource, int $limit, float $ttl, string $prefix = '')
     {
@@ -28,19 +29,25 @@ final class Key
             throw new \InvalidArgumentException('A positive number is required for a throttle\'s "time to live".');
         }
 
-        $this->resource = $prefix.$resource;
+        $this->resource = $resource;
         $this->limit = $limit;
         $this->ttl = $ttl;
+        $this->prefix = $prefix;
     }
 
     public function __toString(): string
     {
-        return $this->resource.$this->limit.$this->ttl;
+        return $this->prefix.$this->resource.$this->limit.$this->ttl;
     }
 
     public function createCounter(): Counter
     {
         return new Counter(0, time() + $this->ttl);
+    }
+
+    public function resource(): string
+    {
+        return $this->resource;
     }
 
     public function limit(): int
