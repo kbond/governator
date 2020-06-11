@@ -36,6 +36,7 @@
                             <element key="3"><string>Symfony\Component\Cache\Traits</string></element>
                             <element key="4"><string>Symfony\Component\Cache\Adapter</string></element>
                             <element key="5"><string>Symfony\Component\Cache\Simple</string></element>
+                            <element key="6"><string>Zenstruck\Governator\Tests\Integration</string></element>
                         </array>
                     </element>
                 </array>
