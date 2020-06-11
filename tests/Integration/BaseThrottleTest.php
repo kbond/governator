@@ -11,7 +11,7 @@ use Zenstruck\Governator\ThrottleFactory;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-abstract class ThrottleTest extends TestCase
+abstract class BaseThrottleTest extends TestCase
 {
     use MocksClock;
 

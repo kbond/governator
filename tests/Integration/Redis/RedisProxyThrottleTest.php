@@ -6,14 +6,14 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\Cache\Traits\RedisProxy;
 use Zenstruck\Governator\Store;
 use Zenstruck\Governator\Store\RedisStore;
-use Zenstruck\Governator\Tests\Integration\ThrottleTest;
+use Zenstruck\Governator\Tests\Integration\BaseThrottleTest;
 
 /**
  * @requires extension redis
  *
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class RedisProxyThrottleTest extends ThrottleTest
+final class RedisProxyThrottleTest extends BaseThrottleTest
 {
     public static function setUpBeforeClass(): void
     {

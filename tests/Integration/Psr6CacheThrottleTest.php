@@ -10,7 +10,7 @@ use Zenstruck\Governator\Store\Psr6CacheStore;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class Psr6CacheThrottleTest extends ThrottleTest
+final class Psr6CacheThrottleTest extends BaseThrottleTest
 {
     protected static function clockMockClasses(): iterable
     {

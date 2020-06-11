@@ -8,7 +8,7 @@ use Zenstruck\Governator\Store\MemoryStore;
 /**
  * @author Kevin Bond <kevinbond@gmail.com>
  */
-final class MemoryThrottleTest extends ThrottleTest
+final class MemoryThrottleTest extends BaseThrottleTest
 {
     protected function createStore(): Store
     {
