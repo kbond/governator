@@ -34,7 +34,7 @@ final class Key
 
     public function __toString(): string
     {
-        return $this->prefix.$this->resource.$this->limit.$this->ttl;
+        return $this->prefix.\rtrim(\strtr(\base64_encode($this->resource), '+/', '-_'), '=').$this->limit.$this->ttl;
     }
 
     public function createCounter(): Counter

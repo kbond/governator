@@ -72,7 +72,9 @@ final class KeyTest extends TestCase
      */
     public function can_convert_to_string(): void
     {
-        $this->assertSame('foo1060', (string) new Key('foo', 10, 60));
+        $resource = \rtrim(\strtr(\base64_encode('foo'), '+/', '-_'), '=');
+
+        $this->assertSame($resource.'1060', (string) new Key('foo', 10, 60));
     }
 
     /**
@@ -80,6 +82,8 @@ final class KeyTest extends TestCase
      */
     public function converting_to_string_includes_prefix(): void
     {
-        $this->assertSame('my-prefix-foo1060', (string) new Key('foo', 10, 60, 'my-prefix-'));
+        $resource = \rtrim(\strtr(\base64_encode('foo'), '+/', '-_'), '=');
+
+        $this->assertSame("my-prefix-{$resource}1060", (string) new Key('foo', 10, 60, 'my-prefix-'));
     }
 }
