@@ -9,14 +9,11 @@ final class Key
 {
     private string $resource;
     private int $limit;
-    private float $ttl;
+    private int $ttl;
     private string $prefix;
 
-    public function __construct(string $resource, int $limit, float $ttl, string $prefix = '')
+    public function __construct(string $resource, int $limit, int $ttl, string $prefix = '')
     {
-        // TODO Remove if ever allow partial second ttl
-        $ttl = (float) \ceil($ttl);
-
         if (empty($resource)) {
             throw new \InvalidArgumentException('A non-empty string is required for a throttle\'s "resource".');
         }
@@ -55,7 +52,7 @@ final class Key
         return $this->limit;
     }
 
-    public function ttl(): float
+    public function ttl(): int
     {
         return $this->ttl;
     }

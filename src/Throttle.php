@@ -26,19 +26,15 @@ final class Throttle
      * DOES NOT BLOCK the process if the throttle's quota is exceeded and its time until reset is greater
      * than the passed time.
      *
-     * @param float $blockFor Max number of seconds to block the process waiting for the throttle to reset.
-     *                        Partial seconds are rounded up to the next whole second.
+     * @param int $blockFor max number of seconds to block the process waiting for the throttle to reset
      *
      * @return Quota Information on the current state of the throttle
      *
      * @throws QuotaExceeded If the current hit exceeds the throttle's limit and the passed time
      *                       is less then the throttle's "time to live"
      */
-    public function hit(float $blockFor = 0.0): Quota
+    public function hit(int $blockFor = 0): Quota
     {
-        // TODO Remove if ever allow partial second blocking
-        $blockFor = (float) \ceil($blockFor);
-
         try {
             return $this->hitStore();
         } catch (QuotaExceeded $exception) {

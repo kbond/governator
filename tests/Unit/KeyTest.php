@@ -12,16 +12,6 @@ final class KeyTest extends TestCase
 {
     /**
      * @test
-     */
-    public function partial_second_ttl_is_rounded_up_to_next_whole_second(): void
-    {
-        $key = new Key('foo', 10, 0.3);
-
-        $this->assertSame(1.0, $key->ttl());
-    }
-
-    /**
-     * @test
      * @dataProvider invalidNumberProvider
      */
     public function ttl_must_be_positive($number): void
@@ -59,7 +49,6 @@ final class KeyTest extends TestCase
     {
         yield [0];
         yield [-1];
-        yield [-0.1];
     }
 
     /**
@@ -84,8 +73,6 @@ final class KeyTest extends TestCase
     public function can_convert_to_string(): void
     {
         $this->assertSame('foo1060', (string) new Key('foo', 10, 60));
-        $this->assertSame('foo1060', (string) new Key('foo', 10, 60.0));
-        $this->assertSame('foo1060', (string) new Key('foo', 10, 59.1));
     }
 
     /**

@@ -35,10 +35,9 @@ final class ThrottleFactory
      *
      * @param string $resource Unique identifier for the throttle
      * @param int    $limit    The maximum number of throttle "hits" in its "time window"
-     * @param float  $ttl      The "time window" for the throttle in seconds.
-     *                         Partial seconds are rounded up to the next whole second.
+     * @param int    $ttl      the "time window" for the throttle in seconds
      */
-    public function create(string $resource, int $limit, float $ttl): Throttle
+    public function create(string $resource, int $limit, int $ttl): Throttle
     {
         return new Throttle($this->store, new Key($resource, $limit, $ttl, $this->prefix));
     }

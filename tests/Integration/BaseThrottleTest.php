@@ -132,37 +132,6 @@ abstract class BaseThrottleTest extends TestCase
     /**
      * @test
      */
-    public function partial_second_ttl_is_rounded_up_to_next_whole_second(): void
-    {
-        $resource = 'foo';
-        $limit = 2;
-        $ttl = 1.3;
-        $factory = $this->factory();
-        $factory->create($resource, $limit, $ttl)->reset();
-
-        $quota = $factory->create($resource, $limit, $ttl)->hit();
-
-        $this->assertSame(1, $quota->hits());
-        $this->assertSame(1, $quota->remaining());
-        $this->assertSame(2, $quota->resetsIn());
-
-        $quota = $factory->create($resource, $limit, $ttl)->hit();
-
-        $this->assertSame(2, $quota->hits());
-        $this->assertSame(0, $quota->remaining());
-        $this->assertSame(2, $quota->resetsIn());
-
-        sleep($quota->resetsIn());
-
-        $quota = $factory->create($resource, $limit, $ttl)->hit();
-        $this->assertSame(1, $quota->hits());
-        $this->assertSame(1, $quota->remaining());
-        $this->assertSame(2, $quota->resetsIn());
-    }
-
-    /**
-     * @test
-     */
     public function hit_with_block_returns_quota_right_away_if_not_exceeded(): void
     {
         $resource = 'foo';
@@ -254,52 +223,6 @@ abstract class BaseThrottleTest extends TestCase
         }
 
         $this->fail('Exception not thrown.');
-    }
-
-    /**
-     * @test
-     */
-    public function partial_seconds_passed_to_hit_are_rounded_up_to_next_whole_second(): void
-    {
-        $resource = 'foo';
-        $limit = 2;
-        $ttl = 2;
-        $factory = $this->factory();
-        $factory->create($resource, $limit, $ttl)->reset();
-
-        $start = time();
-        $factory->create($resource, $limit, $ttl)->hit();
-        $factory->create($resource, $limit, $ttl)->hit();
-
-        $quota = $factory->create($resource, $limit, $ttl)->hit(1.1);
-
-        $this->assertSame($start + 2, time());
-        $this->assertSame(1, $quota->hits());
-        $this->assertSame(1, $quota->remaining());
-        $this->assertSame(2, $quota->resetsIn());
-    }
-
-    /**
-     * @test
-     */
-    public function partial_seconds_passed_to_builder_hit_are_rounded_up_to_next_whole_second(): void
-    {
-        $resource = 'foo';
-        $limit = 2;
-        $ttl = 2;
-        $factory = $this->factory();
-        $factory->create($resource, $limit, $ttl)->reset();
-
-        $start = time();
-        $factory->create($resource, $limit, $ttl)->hit();
-        $factory->create($resource, $limit, $ttl)->hit();
-
-        $quota = $factory->throttle($resource)->allow($limit)->every($ttl)->hit(1.1);
-
-        $this->assertSame($start + 2, time());
-        $this->assertSame(1, $quota->hits());
-        $this->assertSame(1, $quota->remaining());
-        $this->assertSame(2, $quota->resetsIn());
     }
 
     /**

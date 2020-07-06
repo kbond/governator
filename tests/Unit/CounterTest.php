@@ -14,22 +14,6 @@ final class CounterTest extends TestCase
 {
     /**
      * @test
-     * @dataProvider resetsAtProvider
-     */
-    public function resets_at_rounded_up_to_next_whole_second($resetsAt, $expectedResetsAt): void
-    {
-        $this->assertSame($expectedResetsAt, (new Counter(10, $resetsAt + time()))->resetsIn());
-    }
-
-    public static function resetsAtProvider(): iterable
-    {
-        yield [1, 1];
-        yield [0.1, 1];
-        yield [1.3, 2];
-    }
-
-    /**
-     * @test
      */
     public function resets_in_cannot_be_negative(): void
     {

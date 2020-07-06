@@ -12,7 +12,7 @@ final class ThrottleBuilder
     private ThrottleFactory $factory;
     private string $resource;
     private ?int $limit = null;
-    private ?float $ttl = null;
+    private ?int $ttl = null;
 
     public function __construct(ThrottleFactory $factory, string $resource)
     {
@@ -31,10 +31,9 @@ final class ThrottleBuilder
     }
 
     /**
-     * @param float $seconds The "time window" for the throttle in seconds.
-     *                       Partial seconds are rounded up to the next whole second.
+     * @param int $seconds the "time window" for the throttle in seconds
      */
-    public function every(float $seconds): self
+    public function every(int $seconds): self
     {
         $this->ttl = $seconds;
 
@@ -65,7 +64,7 @@ final class ThrottleBuilder
      *
      * @see Throttle::hit()
      */
-    public function hit(float $blockFor = 0.0): Quota
+    public function hit(int $blockFor = 0): Quota
     {
         return $this->create()->hit($blockFor);
     }

@@ -10,10 +10,10 @@ final class Counter
     private int $hits;
     private int $resetsAt;
 
-    public function __construct(int $hits, float $resetsAt)
+    public function __construct(int $hits, int $resetsAt)
     {
         $this->hits = $hits;
-        $this->resetsAt = \ceil($resetsAt);
+        $this->resetsAt = $resetsAt;
     }
 
     public function hits(): int
