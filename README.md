@@ -1,5 +1,9 @@
 # Governator
 
+[![CI Status](https://github.com/zenstruck/governator/workflows/CI/badge.svg)](https://github.com/zenstruck/governator/actions?query=workflow%3ACI)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/zenstruck/governator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/zenstruck/governator/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/zenstruck/governator/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/zenstruck/governator/?branch=master)
+
 A generic *fixed window* rate limiting throttle with an intuitive and fluent API that supports multiple backends.
 
 ```php
