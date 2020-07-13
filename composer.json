@@ -1,10 +1,10 @@
 {
     "name": "zenstruck/governator",
-    "description": "TODO",
+    "description": "A generic fixed window rate limiting throttle with an intuitive and fluent API that supports multiple backends.",
     "homepage": "https://github.com/zenstruck/governator",
     "type": "library",
     "license": "MIT",
-    "keywords": ["throttle"],
+    "keywords": ["throttle", "rate-limit", "symfony", "redis"],
     "authors": [
         {
             "name": "Kevin Bond",

@@ -46,6 +46,7 @@ try {
         3. [Login Throttle](#login-throttle)
         4. [API Request Throttle](#api-request-throttle)
         5. [Message Handler "Funnel" Throttle](#message-handler-funnel-throttle)
+5. [Credit](#credit)
 
 ## Installation
 
@@ -102,7 +103,7 @@ $quota->resetsIn(); // 7 (seconds)
 $quota->resetsAt(); // \DateTimeInterface (+7 seconds)
 ```
 
-If *hitting* the throttle, exceeds the *limit* within the *window*, a `QuotaExceeded` exception is thrown that has
+If *hitting* the throttle exceeds the *limit* within the *window*, a `QuotaExceeded` exception is thrown that has
 useful details like when it will next be available:
 
 ```php
@@ -138,7 +139,7 @@ use Zenstruck\Governator\Throttle;
 /** @var Throttle $throttle */
 
 // Continuing from our example above, this will throw a QuotaExceeded exception immediately
-// because the passed block for time is less than the 5 seconds passed.
+// because the passed block for time is less than the window's TTL of 7 seconds.
 $throttle->hit(5); // throws QuotaExceeded exception
 
 // This will block the process for 7 seconds (the time until the throttle resets) before
@@ -175,8 +176,8 @@ $factory->throttle('something')->allow(5)->every(10)->reset();
 
 ### ThrottleFactory *factory*
 
-Throttle Factory's can be created using the `::for()` named constructor. You can pass and object or string (DSN) and,
-if supported, will create the factory based on this:
+Throttle Factory's can be created using the `::for()` named constructor. You can pass an object or string (DSN),
+if supported, it will create the factory based on this:
 
 ```php
 use Zenstruck\Governator\ThrottleFactory;
@@ -253,7 +254,7 @@ $factory = ThrottleFactory::for('redis://localhost');
 
 ### Memory Store
 
-This store maintains the throttle in memory and is reset at the end of the PHP process.
+This store maintains the throttle in memory and is reset at the end of the current PHP process.
 
 ```php
 use Zenstruck\Governator\Store\MemoryStore;
@@ -307,7 +308,7 @@ Zenstruck\Governator\ThrottleFactory:
 
 #### Throttle Controller
 
-One scenario is to rate limit a specific controller (assumes `ThrottleFactory` as
+One scenario is to rate limit a specific controller (assumes `ThrottleFactory` is
 [registered as a service](#symfony-integration)):
 
 ```php
@@ -518,6 +519,7 @@ class ApiThrottleSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event): void
     {
         if (!$this->quota) {
+            // quota was not set for this request
             return;
         }
 
@@ -596,3 +598,8 @@ final class GeocodeIpHandler implements MessageHandlerInterface
 
 Because the handler is run in the background, we block the throttle *hit* for up to 2 seconds waiting for the service
 to become available.
+
+## Credit
+
+This inspiration for this library's API comes from [Laravel](https://laravel.com/) and
+[Symfony's Lock Component](https://symfony.com/doc/current/components/lock.html).
