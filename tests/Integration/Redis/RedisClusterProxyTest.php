@@ -30,8 +30,8 @@ final class RedisClusterProxyTest extends BaseRedisThrottleTest
 
     protected function createConnection(): object
     {
-        $hosts = \array_map(fn($host) => "host[{$host}]", \explode(' ', \getenv('REDIS_CLUSTER_HOSTS')));
-        $connection = RedisAdapter::createConnection('redis:/?'.\implode('&', $hosts), ['lazy' => true, 'redis_cluster' => true]);
+        $hosts = \getenv('REDIS_CLUSTER_HOSTS');
+        $connection = RedisAdapter::createConnection('redis:?host['.\str_replace(' ', ']&host[', $hosts).']', ['lazy' => true, 'redis_cluster' => true]);
 
         if (!$connection instanceof RedisClusterProxy) {
             throw new \RuntimeException('Expected instance of '.RedisClusterProxy::class);
