@@ -20,12 +20,12 @@ final class ThrottleTest extends TestCase
     {
         $throttle = new Throttle(new MemoryStore(), new Key('foo', 1, 10));
 
-        $throttle->hit();
+        $throttle->acquire();
 
         $start = time();
 
         try {
-            $throttle->hit(-20);
+            $throttle->acquire(-20);
         } catch (QuotaExceeded $e) {
             $this->assertSame(time(), $start);
 

@@ -33,10 +33,10 @@ final class Throttle
      * @throws QuotaExceeded If the current hit exceeds the throttle's limit and the passed time
      *                       is less then the throttle's "time to live"
      */
-    public function hit(int $blockFor = 0): Quota
+    public function acquire(int $blockFor = 0): Quota
     {
         try {
-            return $this->hitStore();
+            return $this->hit()->check();
         } catch (QuotaExceeded $exception) {
             if ($exception->resetsIn() > $blockFor) {
                 throw $exception;
@@ -45,7 +45,23 @@ final class Throttle
 
         sleep($exception->resetsIn());
 
-        return $this->hitStore();
+        return $this->hit()->check();
+    }
+
+    /**
+     * "Hits" the throttle, increasing its hit count by 1.
+     */
+    public function hit(): Quota
+    {
+        return new Quota($this->key, $this->store->hit($this->key));
+    }
+
+    /**
+     * Fetches the current state of the throttle without increasing its hit count.
+     */
+    public function status(): Quota
+    {
+        return new Quota($this->key, $this->store->status($this->key));
     }
 
     /**
@@ -54,16 +70,5 @@ final class Throttle
     public function reset(): void
     {
         $this->store->reset($this->key);
-    }
-
-    private function hitStore(): Quota
-    {
-        $quota = new Quota($this->key, $this->store->hit($this->key));
-
-        if ($quota->hasBeenExceeded()) {
-            throw new QuotaExceeded($quota);
-        }
-
-        return $quota;
     }
 }

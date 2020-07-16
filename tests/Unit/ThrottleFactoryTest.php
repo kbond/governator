@@ -19,7 +19,7 @@ final class ThrottleFactoryTest extends TestCase
         $throttle = (new ThrottleFactory(new MemoryStore()))->create('foo', 5, 60);
         $resource = \rtrim(\strtr(\base64_encode('foo'), '+/', '-_'), '=');
 
-        $this->assertSame("throttle_{$resource}560", (string) $throttle->hit()->key());
+        $this->assertSame("throttle_{$resource}560", (string) $throttle->acquire()->key());
     }
 
     /**
@@ -30,7 +30,7 @@ final class ThrottleFactoryTest extends TestCase
         $throttle = ThrottleFactory::for('memory')->create('foo', 5, 60);
         $resource = \rtrim(\strtr(\base64_encode('foo'), '+/', '-_'), '=');
 
-        $this->assertSame("throttle_{$resource}560", (string) $throttle->hit()->key());
+        $this->assertSame("throttle_{$resource}560", (string) $throttle->acquire()->key());
     }
 
     /**
@@ -41,7 +41,7 @@ final class ThrottleFactoryTest extends TestCase
         $throttle = (new ThrottleFactory(new MemoryStore(), 'my-prefix-'))->create('foo', 5, 60);
         $resource = \rtrim(\strtr(\base64_encode('foo'), '+/', '-_'), '=');
 
-        $this->assertSame("my-prefix-{$resource}560", (string) $throttle->hit()->key());
+        $this->assertSame("my-prefix-{$resource}560", (string) $throttle->acquire()->key());
     }
 
     /**
@@ -52,6 +52,6 @@ final class ThrottleFactoryTest extends TestCase
         $throttle = ThrottleFactory::for('memory', 'my-prefix-')->create('foo', 5, 60);
         $resource = \rtrim(\strtr(\base64_encode('foo'), '+/', '-_'), '=');
 
-        $this->assertSame("my-prefix-{$resource}560", (string) $throttle->hit()->key());
+        $this->assertSame("my-prefix-{$resource}560", (string) $throttle->acquire()->key());
     }
 }

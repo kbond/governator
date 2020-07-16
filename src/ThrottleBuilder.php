@@ -70,14 +70,27 @@ final class ThrottleBuilder
     }
 
     /**
-     * Create the throttle for the current configuration and "hit" it, potentially blocking the process
-     * for the passed time if it's quota has been exceeded.
-     *
+     * @see Throttle::acquire()
+     */
+    public function acquire(int $blockFor = 0): Quota
+    {
+        return $this->create()->acquire($blockFor);
+    }
+
+    /**
      * @see Throttle::hit()
      */
-    public function hit(int $blockFor = 0): Quota
+    public function hit(): Quota
     {
-        return $this->create()->hit($blockFor);
+        return $this->create()->hit();
+    }
+
+    /**
+     * @see Throttle::status()
+     */
+    public function status(): Quota
+    {
+        return $this->create()->status();
     }
 
     /**

@@ -16,13 +16,16 @@ final class MemoryStore implements Store
 
     public function hit(Key $key): Counter
     {
+        return $this->cache[(string) $key] = $this->status($key)->addHit();
+    }
+
+    public function status(Key $key): Counter
+    {
         $counter = $this->cache[(string) $key] ?? $key->createCounter();
 
         if (0 === $counter->resetsIn()) {
             $counter = $key->createCounter();
         }
-
-        $this->cache[(string) $key] = $counter = $counter->addHit();
 
         return $counter;
     }

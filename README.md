@@ -15,7 +15,7 @@ try {
         ->throttle('something') // the "resource" to throttle
         ->allow(10) // the number of "hits" allowed in the "window"
         ->every(60) // the duration of the "window"
-        ->hit() // "hit" the throttle, increasing it's "hit" count
+        ->acquire() // "acquire" a lock on the throttle, increasing it's "hit" count
     ;
 
     $quota->hits(); // 1
@@ -23,6 +23,7 @@ try {
     $quota->resetsIn(); // 60 (seconds)
     $quota->resetsAt(); // \DateTimeInterface (+60 seconds)
 } catch (QuotaExceeded $e) {
+    // The lock could not be "acquired"
     $e->resetsIn(); // 50 (seconds)
     $e->resetsAt(); // \DateTimeInterface (+50 seconds)
     $e->hits(); // 11
@@ -96,6 +97,7 @@ $quota->hits(); // 1
 $quota->remaining(); // 4
 $quota->resetsIn(); // 10 (seconds)
 $quota->resetsAt(); // \DateTimeInterface (+10 seconds)
+$quota->hasBeenExceeded(); // false
 
 sleep(3);
 
@@ -107,8 +109,8 @@ $quota->resetsIn(); // 7 (seconds)
 $quota->resetsAt(); // \DateTimeInterface (+7 seconds)
 ```
 
-If *hitting* the throttle exceeds the *limit* within the *window*, a `QuotaExceeded` exception is thrown that has
-useful details like when it will next be available:
+If *hitting* the throttle exceeds the *limit* within the *window*, a `Quota` is still returned. The `Quota::check()`
+method throws a `QuotaExceeded` exception if exceeded:
 
 ```php
 use Zenstruck\Governator\Exception\QuotaExceeded;
@@ -117,13 +119,13 @@ use Zenstruck\Governator\Throttle;
 /** @var Throttle $throttle */
 
 try {
-    $throttle->hit();
-    $throttle->hit();
-    $throttle->hit();
+    $throttle->hit()->check(); // instance of Quota
+    $throttle->hit()->check(); // instance of Quota
+    $throttle->hit()->check(); // instance of Quota
 
     // Continuing from the example above, this "hit" throws the exception as it will cause the limit of
     // 5 to be exceeded (within the 10 second window).
-    $throttle->hit();
+    $throttle->hit()->check();
 } catch (QuotaExceeded $e) {
     $e->resetsIn(); // 7 (seconds)
     $e->resetsAt(); // \DateTimeInterface (+7 seconds)
@@ -132,8 +134,19 @@ try {
 }
 ```
 
-The `->hit()` method can optionally take a *block for* parameter in *seconds*. If, when *hitting* the throttle, it is
-exceeded, this is the maximum number of seconds to *block* the process waiting for the throttle to reset. If the time
+You can use the `->aquire()` method to always throw a `QuotaExceeded` exception without calling check:
+
+```php
+use Zenstruck\Governator\Throttle;
+
+/** @var Throttle $throttle */
+
+// Continuing from our example above, this will throw a QuotaExceeded exception
+$throttle->acquire(); // equivalent to $throttle->hit()->check()
+```
+
+The `->acquire()` method can optionally take a *block for* parameter in *seconds*. If, when *hitting* the throttle, it
+is exceeded, this is the maximum number of seconds to *block* the process waiting for the throttle to reset. If the time
 to reset is greater than the passed seconds, no blocking will occur, and it will throw a `QuotaExceeded` exception
 immediately.
 
@@ -144,11 +157,28 @@ use Zenstruck\Governator\Throttle;
 
 // Continuing from our example above, this will throw a QuotaExceeded exception immediately
 // because the passed block for time is less than the window's TTL of 7 seconds.
-$throttle->hit(5); // throws QuotaExceeded exception
+$throttle->acquire(5); // throws QuotaExceeded exception
 
 // This will block the process for 7 seconds (the time until the throttle resets) before
 // returning a Quota object.
-$throttle->hit(10); // returns Quota (no exception)
+$throttle->acquire(10); // returns Quota (no exception)
+```
+
+You can get the status of a throttle (without increasing its "hits") with the `->status()` method.
+
+```php
+use Zenstruck\Governator\Throttle;
+
+/** @var Throttle $throttle */
+
+$quota = $throttle->status(); // assumes the throttle is empty
+
+$quota->hits(); // 0
+
+$throttle->hit();
+$throttle->hit();
+
+$throttle->status()->hits(); // 2
 ```
 
 A throttle can be reset early:
@@ -177,7 +207,9 @@ $factory->throttle('a', 'b')->with('c', 'd')->allow(5)->every(10)->create(); // 
 
 // call throttle methods directly
 $factory->throttle('something')->allow(5)->every(10)->hit();
-$factory->throttle('something')->allow(5)->every(10)->hit(10);
+$factory->throttle('something')->allow(5)->every(10)->acquire();
+$factory->throttle('something')->allow(5)->every(10)->acquire(10);
+$factory->throttle('something')->allow(5)->every(10)->status();
 $factory->throttle('something')->allow(5)->every(10)->reset();
 ```
 
@@ -333,7 +365,7 @@ use Zenstruck\Governator\ThrottleFactory;
 public function index(Request $request, ThrottleFactory $factory)
 {
     // only allow 5 requests every 10 seconds per IP
-    $factory->throttle('page', $request->getClientIp())->allow(5)->every(10)->hit();
+    $factory->throttle('page', $request->getClientIp())->allow(5)->every(10)->acquire();
 
     // the above line with throw a QuotaExceeded exception if the limit has been exceeded
 
@@ -353,7 +385,7 @@ use Zenstruck\Governator\ThrottleFactory;
 public function index(UserInterface $user, ThrottleFactory $factory)
 {
     // only allow 5 requests every 10 seconds per username
-    $factory->throttle('page', $user->getUsername())->allow(5)->every(10)->hit();
+    $factory->throttle('page', $user->getUsername())->allow(5)->every(10)->acquire();
 
     // the above line with throw a QuotaExceeded exception if the limit has been exceeded
 
@@ -375,10 +407,10 @@ public function index(Request $request, ThrottleFactory $factory, UserInterface 
 {
     if ($user) { // authenticated
         // allow 100 requests every 60 seconds per username (authenticated users have a higher rate limit)
-        $factory->throttle('page', $user->getUsername())->allow(100)->every(60)->hit();
+        $factory->throttle('page', $user->getUsername())->allow(100)->every(60)->acquire();
     } else { // anonymous
         // allow 5 requests every 10 seconds per IP
-        $factory->throttle('page', $request->getClientIp())->allow(5)->every(10)->hit();
+        $factory->throttle('page', $request->getClientIp())->allow(5)->every(10)->acquire();
     }
 
     // ...your controller's code as normal...
@@ -397,10 +429,10 @@ use Zenstruck\Governator\ThrottleFactory;
 public function index(UserInterface $user, ThrottleFactory $factory)
 {
     // only allow 10 requests every 10 seconds
-    $factory->throttle('page', 'short', $user->getUsername())->allow(10)->every(10)->hit();
+    $factory->throttle('page', 'short', $user->getUsername())->allow(10)->every(10)->acquire();
 
     // additionally, only allow 20 requests every 60 seconds
-    $factory->throttle('page', 'long', $user->getUsername())->allow(20)->every(60)->hit();
+    $factory->throttle('page', 'long', $user->getUsername())->allow(20)->every(60)->acquire();
 
     // ...your controller's code as normal...
 }
@@ -474,7 +506,7 @@ public function getCredentials(Request $request)
         ->throttle('login', $request->getClientIp(), $credentials['email'])
         ->allow(5)
         ->every(60)
-        ->hit()
+        ->acquire() // throws QuotaExceeded if exceeded
     ;
 
     // ...
@@ -525,7 +557,7 @@ class ApiThrottleSubscriber implements EventSubscriberInterface
         // only allow 5 api requests every 20 seconds
         // and set the returned quota for use in the response listener below
         // let QuotaExceeded exceptions bubble up (to the QuotaExceededSubscriber above)
-        $this->quota = $this->factory->throttle('api', $ip)->allow(5)->every(20)->hit();
+        $this->quota = $this->factory->throttle('api', $ip)->allow(5)->every(20)->acquire();
     }
 
     public function onKernelResponse(ResponseEvent $event): void
@@ -593,7 +625,7 @@ final class GeocodeIpHandler implements MessageHandlerInterface
                 ->throttle('geocoding-service')
                 ->allow(1)
                 ->every(5)
-                ->hit(2) // block for up to 2 seconds to wait for throttle to be available
+                ->acquire(2) // block for up to 2 seconds to wait for throttle to be available
             ;
         } catch (QuotaExceeded $e) {
             // rate limit of service exceeded

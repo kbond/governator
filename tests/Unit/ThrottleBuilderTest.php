@@ -3,6 +3,7 @@
 namespace Zenstruck\Governator\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use Zenstruck\Governator\Exception\QuotaExceeded;
 use Zenstruck\Governator\Store\MemoryStore;
 use Zenstruck\Governator\ThrottleBuilder;
 use Zenstruck\Governator\ThrottleFactory;
@@ -15,6 +16,80 @@ final class ThrottleBuilderTest extends TestCase
     /**
      * @test
      */
+    public function can_call_acquire_directly(): void
+    {
+        $builder = ThrottleFactory::for('memory')->throttle('foo')->allow(2)->every(10);
+
+        $builder->acquire();
+        $builder->acquire();
+
+        try {
+            $builder->acquire();
+        } catch (QuotaExceeded $e) {
+            $this->assertSame(3, $e->hits());
+
+            return;
+        }
+
+        $this->fail('Exception not thrown');
+    }
+
+    /**
+     * @test
+     */
+    public function can_call_reset_directly(): void
+    {
+        $builder = ThrottleFactory::for('memory')->throttle('foo')->allow(5)->every(10);
+
+        $builder->acquire();
+        $builder->acquire();
+        $builder->reset();
+
+        $this->assertSame(1, $builder->acquire()->hits());
+    }
+
+    /**
+     * @test
+     */
+    public function can_call_status_directly(): void
+    {
+        $builder = ThrottleFactory::for('memory')->throttle('foo')->allow(2)->every(10);
+
+        $builder->hit();
+        $builder->hit();
+        $builder->hit();
+
+        $this->assertSame(3, $builder->status()->hits());
+
+        try {
+            $builder->status()->check();
+        } catch (QuotaExceeded $e) {
+            $this->assertSame(3, $e->hits());
+
+            return;
+        }
+
+        $this->fail('Exception not thrown');
+    }
+
+    /**
+     * @test
+     */
+    public function can_call_hit_directly(): void
+    {
+        $builder = ThrottleFactory::for('memory')->throttle('foo')->allow(2)->every(10);
+
+        $builder->hit();
+        $builder->hit();
+        $quota = $builder->hit();
+
+        $this->assertSame(3, $quota->hits());
+        $this->assertTrue($quota->hasBeenExceeded());
+    }
+
+    /**
+     * @test
+     */
     public function multiple_resources_are_converted_to_string(): void
     {
         $key = ThrottleFactory::for('memory')
@@ -23,7 +98,7 @@ final class ThrottleBuilderTest extends TestCase
             ->with('e')
             ->allow(5)
             ->every(60)
-            ->hit()
+            ->acquire()
             ->key()
         ;
 

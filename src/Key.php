@@ -11,6 +11,7 @@ final class Key
     private int $limit;
     private int $ttl;
     private string $prefix;
+    private ?string $string = null;
 
     public function __construct(string $resource, int $limit, int $ttl, string $prefix = '')
     {
@@ -34,7 +35,7 @@ final class Key
 
     public function __toString(): string
     {
-        return $this->prefix.\rtrim(\strtr(\base64_encode($this->resource), '+/', '-_'), '=').$this->limit.$this->ttl;
+        return $this->string ?: $this->string = $this->prefix.\rtrim(\strtr(\base64_encode($this->resource), '+/', '-_'), '=').$this->limit.$this->ttl;
     }
 
     public function createCounter(): Counter

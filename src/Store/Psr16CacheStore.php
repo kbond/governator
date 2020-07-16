@@ -21,15 +21,20 @@ final class Psr16CacheStore implements Store
 
     public function hit(Key $key): Counter
     {
+        $counter = $this->status($key)->addHit();
+
+        $this->cache->set((string) $key, $counter, $counter->resetsIn());
+
+        return $counter;
+    }
+
+    public function status(Key $key): Counter
+    {
         $counter = $this->cache->get((string) $key);
 
         if (!$counter instanceof Counter) {
             $counter = $key->createCounter();
         }
-
-        $counter = $counter->addHit();
-
-        $this->cache->set((string) $key, $counter, $counter->resetsIn());
 
         return $counter;
     }

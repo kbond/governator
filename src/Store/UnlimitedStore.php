@@ -16,6 +16,11 @@ final class UnlimitedStore implements Store
         return new Counter(1, time() + $key->ttl());
     }
 
+    public function status(Key $key): Counter
+    {
+        return $key->createCounter();
+    }
+
     public function reset(Key $key): void
     {
         // noop

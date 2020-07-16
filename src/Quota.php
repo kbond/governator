@@ -2,6 +2,8 @@
 
 namespace Zenstruck\Governator;
 
+use Zenstruck\Governator\Exception\QuotaExceeded;
+
 /**
  * Information on the current state of the throttle.
  *
@@ -77,5 +79,17 @@ final class Quota
     public function hasBeenExceeded(): bool
     {
         return $this->counter->hits() > $this->limit();
+    }
+
+    /**
+     * @throws QuotaExceeded If the throttle has been exceeded
+     */
+    public function check(): self
+    {
+        if ($this->hasBeenExceeded()) {
+            throw new QuotaExceeded($this);
+        }
+
+        return $this;
     }
 }

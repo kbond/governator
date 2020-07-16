@@ -20,17 +20,17 @@ final class UnlimitedThrottleTest extends TestCase
     {
         $throttle = (new ThrottleFactory(new UnlimitedStore()))->create('foo', 5, 60);
 
-        $quota = $throttle->hit();
+        $quota = $throttle->acquire();
 
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
 
         $throttle->reset();
-        $throttle->hit();
-        $throttle->hit();
-        $throttle->hit();
-        $quota = $throttle->hit();
+        $throttle->acquire();
+        $throttle->acquire();
+        $throttle->acquire();
+        $quota = $throttle->acquire();
 
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
@@ -38,7 +38,7 @@ final class UnlimitedThrottleTest extends TestCase
 
         sleep(4);
 
-        $quota = $throttle->hit();
+        $quota = $throttle->acquire();
 
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
@@ -53,11 +53,30 @@ final class UnlimitedThrottleTest extends TestCase
         $throttle = (new ThrottleFactory(new UnlimitedStore()))->create('foo', 5, 60);
         $start = time();
 
-        $quota = $throttle->hit(5);
+        $quota = $throttle->acquire(5);
 
         $this->assertSame(time(), $start);
         $this->assertSame(1, $quota->hits());
         $this->assertSame(4, $quota->remaining());
+        $this->assertSame(60, $quota->resetsIn());
+    }
+
+    /**
+     * @test
+     */
+    public function status_always_returns_empty_quota(): void
+    {
+        $throttle = (new ThrottleFactory(new UnlimitedStore()))->create('foo', 5, 60);
+
+        $throttle->acquire();
+        $throttle->acquire();
+        $throttle->acquire();
+        $throttle->acquire();
+
+        $quota = $throttle->status();
+
+        $this->assertSame(0, $quota->hits());
+        $this->assertSame(5, $quota->remaining());
         $this->assertSame(60, $quota->resetsIn());
     }
 }
