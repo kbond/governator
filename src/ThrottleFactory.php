@@ -47,10 +47,10 @@ final class ThrottleFactory
      *
      * @see ThrottleBuilder
      *
-     * @param string $resource Unique identifier for the throttle
+     * @param string ...$resource Unique identifier(s) for the throttle
      */
-    public function throttle(string $resource): ThrottleBuilder
+    public function throttle(string ...$resource): ThrottleBuilder
     {
-        return new ThrottleBuilder($this, $resource);
+        return new ThrottleBuilder($this, ...$resource);
     }
 }

@@ -172,6 +172,9 @@ use Zenstruck\Governator\ThrottleFactory;
 
 $factory->throttle('something')->allow(5)->every(10)->create(); // instance of Zenstruck\Governator\ThrottleFactory
 
+// easily build resources
+$factory->throttle('a', 'b')->with('c', 'd')->allow(5)->every(10)->create(); // resource = "abcd"
+
 // call throttle methods directly
 $factory->throttle('something')->allow(5)->every(10)->hit();
 $factory->throttle('something')->allow(5)->every(10)->hit(10);
@@ -308,6 +311,11 @@ Zenstruck\Governator\ThrottleFactory:
 Zenstruck\Governator\ThrottleFactory:
     arguments: ['%env(REDIS_THROTTLE_DSN)%'] # REDIS_THROTTLE_DSN=redis://localhost (in your .env)
     factory: [Zenstruck\Governator\ThrottleFactory, 'for']
+
+# customize the prefix
+Zenstruck\Governator\ThrottleFactory:
+    arguments: ['@cache.app', 'my-prefix-']
+    factory: [Zenstruck\Governator\ThrottleFactory, 'for']
 ```
 
 #### Throttle Controller
@@ -325,7 +333,7 @@ use Zenstruck\Governator\ThrottleFactory;
 public function index(Request $request, ThrottleFactory $factory)
 {
     // only allow 5 requests every 10 seconds per IP
-    $factory->throttle("page-{$request->getClientIp()}")->allow(5)->every(10)->hit();
+    $factory->throttle('page', $request->getClientIp())->allow(5)->every(10)->hit();
 
     // the above line with throw a QuotaExceeded exception if the limit has been exceeded
 
@@ -345,7 +353,7 @@ use Zenstruck\Governator\ThrottleFactory;
 public function index(UserInterface $user, ThrottleFactory $factory)
 {
     // only allow 5 requests every 10 seconds per username
-    $factory->throttle("page-{$user->getUsername()}")->allow(5)->every(10)->hit();
+    $factory->throttle('page', $user->getUsername())->allow(5)->every(10)->hit();
 
     // the above line with throw a QuotaExceeded exception if the limit has been exceeded
 
@@ -367,10 +375,10 @@ public function index(Request $request, ThrottleFactory $factory, UserInterface 
 {
     if ($user) { // authenticated
         // allow 100 requests every 60 seconds per username (authenticated users have a higher rate limit)
-        $factory->throttle("page-{$user->getUsername()}")->allow(100)->every(60)->hit();
+        $factory->throttle('page', $user->getUsername())->allow(100)->every(60)->hit();
     } else { // anonymous
         // allow 5 requests every 10 seconds per IP
-        $factory->throttle("page-{$request->getClientIp()}")->allow(5)->every(10)->hit();
+        $factory->throttle('page', $request->getClientIp())->allow(5)->every(10)->hit();
     }
 
     // ...your controller's code as normal...
@@ -389,10 +397,10 @@ use Zenstruck\Governator\ThrottleFactory;
 public function index(UserInterface $user, ThrottleFactory $factory)
 {
     // only allow 10 requests every 10 seconds
-    $factory->throttle("page-short-{$user->getUsername()}")->allow(10)->every(10)->hit();
+    $factory->throttle('page', 'short', $user->getUsername())->allow(10)->every(10)->hit();
 
     // additionally, only allow 20 requests every 60 seconds
-    $factory->throttle("page-long-{$user->getUsername()}")->allow(20)->every(60)->hit();
+    $factory->throttle('page', 'long', $user->getUsername())->allow(20)->every(60)->hit();
 
     // ...your controller's code as normal...
 }
@@ -463,7 +471,7 @@ public function getCredentials(Request $request)
 
     // only allow 5 attempts per email/ip a minute
     $this->throttleFactory
-        ->throttle("login{$request->getClientIp()}{$credentials['email']}")
+        ->throttle('login', $request->getClientIp(), $credentials['email'])
         ->allow(5)
         ->every(60)
         ->hit()
@@ -517,7 +525,7 @@ class ApiThrottleSubscriber implements EventSubscriberInterface
         // only allow 5 api requests every 20 seconds
         // and set the returned quota for use in the response listener below
         // let QuotaExceeded exceptions bubble up (to the QuotaExceededSubscriber above)
-        $this->quota = $this->factory->throttle("api{$ip}")->allow(5)->every(20)->hit();
+        $this->quota = $this->factory->throttle('api', $ip)->allow(5)->every(20)->hit();
     }
 
     public function onKernelResponse(ResponseEvent $event): void

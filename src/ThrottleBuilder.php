@@ -10,14 +10,21 @@ namespace Zenstruck\Governator;
 final class ThrottleBuilder
 {
     private ThrottleFactory $factory;
-    private string $resource;
+    private array $resource;
     private ?int $limit = null;
     private ?int $ttl = null;
 
-    public function __construct(ThrottleFactory $factory, string $resource)
+    public function __construct(ThrottleFactory $factory, string ...$resource)
     {
         $this->factory = $factory;
         $this->resource = $resource;
+    }
+
+    public function with(string ...$resource): self
+    {
+        $this->resource = \array_merge($this->resource, $resource);
+
+        return $this;
     }
 
     /**
@@ -55,7 +62,11 @@ final class ThrottleBuilder
             throw new \LogicException(\sprintf('You must set a "TTL" for the throttle via "%s::every($ttl)"', self::class));
         }
 
-        return $this->factory->create($this->resource, $this->limit, $this->ttl);
+        if (empty($this->resource)) {
+            throw new \LogicException('The resource for the throttle cannot be blank.');
+        }
+
+        return $this->factory->create(\implode('', $this->resource), $this->limit, $this->ttl);
     }
 
     /**
